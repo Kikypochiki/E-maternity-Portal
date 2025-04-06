@@ -55,10 +55,16 @@ const data = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="bg-sidebar">
-        <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
-          <Image src="/heart-rate.png" alt="heart rate" width={40} height={40} className="w-8 h-8 sm:w-10 sm:h-10" />
-          <h1 className="text-lg font-semibold tracking-tight pl-3">
+      <SidebarHeader>
+        <div className="flex items-center gap-1">
+          <Image
+            src="/icons8-maternity-50.png"
+            alt="heart rate"
+            width={40}
+            height={40}
+            className="group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-"
+          />
+          <h1 className="text-xl font-semibold tracking-tight pl-1 group-data-[collapsible=icon]:hidden">
             E-Maternity Portal
           </h1>
         </div>

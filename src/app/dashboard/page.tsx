@@ -78,14 +78,14 @@ export default function Dashboard() {
     <div className="flex flex-col container w-full mx-auto pt-5">
       <div className="flex flex-row h-4 m-5">
         <div className="flex items-center">
-          <h1 className="text-zinc-300 sm:text-2xl text-xl m-2">
+          <h1 className="sm:text-2xl text-xl m-2">
             Patient Dashboard
           </h1>
         </div>
-        <div className="flex flex-1 items-center justify-end text-white">
+        <div className="flex flex-1 items-center justify-end">
           <PatientAddForm
             trigger={
-              <Button className="m-3 sm:text-sm text-xs w-25 sm:w-30 h-8 bg-background border border-color-border rounded-lg hover:bg-zinc-700 active:bg-zinc-900 flex items-center justify-center gap-2">
+              <Button>
           Add Patient
           <Plus size={16} />
               </Button>
@@ -94,37 +94,37 @@ export default function Dashboard() {
           />
         </div>
       </div>
-      <div className="m-5 flex-col bg-background rounded-lg border border-zinc-800 shadow-lg">
-      <div className="flex flex-col h-15 border-b border-zinc-800 rounded-t-lg bg-color-primary bg-primary justify-center w-full sm:w-full p-5">
+      <div className="m-5 flex-col rounded-lg border shadow-lg">
+      <div className="bg-accent flex flex-col h-15 border-b rounded-t-lg justify-center w-full sm:w-full p-5">
       <div className="flex flex-row items-center text-left">
-        <h1 className="sm:text-lg sm:text-md w-full">
+        <h1 className="sm:text-lg sm:text-md w-full font-bold">
           Patient
         </h1>
-        <h1 className="sm:text-lg sm:text-md w-full">
-          Id
+        <h1 className="sm:text-lg sm:text-md w-full font-bold">
+          ID
         </h1>
-        <h1 className="sm:text-lg sm:text-md w-full">
-          Id
+        <h1 className="sm:text-lg sm:text-md w-full font-bold">
+          Status
         </h1>
         </div>
       </div>
         {isLoading ? (
           <div className="flex justify-center items-center h-40">
-        <p className="text-zinc-400">Loading patients...</p>
+        <p>Loading patients...</p>
           </div>
         ) : filteredPatients.length === 0 ? (
           <div className="flex justify-center items-center h-40">
         {searchQuery ? (
           <div className="text-center">
-            <p className="text-zinc-400">No patients found matching "{searchQuery}"</p>
-            <p className="text-zinc-500 text-sm mt-2">Try a different search term</p>
+            <p>No patients found matching "{searchQuery}"</p>
+            <p className=" text-sm mt-2">Try a different search term</p>
           </div>
         ) : (
-          <p className="text-zinc-400">No patients found. Add a patient to get started.</p>
+          <p>No patients found. Add a patient to get started.</p>
         )}
           </div>
         ) : (
-        <ScrollArea className="h-[530px] w-full">
+        <ScrollArea className="w-full">
         {filteredPatients.map((patient) => (
           <div key={patient.patient_id}>
             <PatientBasicInfoView

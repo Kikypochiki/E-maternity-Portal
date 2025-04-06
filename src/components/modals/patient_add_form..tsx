@@ -144,10 +144,10 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
       <DialogTrigger asChild onClick={() => setIsOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-zinc-900 border border-zinc-700">
-        <DialogHeader className="pb-4 border-b border-zinc-700">
-          <DialogTitle className="text-xl font-bold text-white">Add Patient</DialogTitle>
-          <DialogDescription className="text-zinc-300 text-sm mt-1">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-4 border-b">
+          <DialogTitle className="text-xl font-bold">Add Patient</DialogTitle>
+          <DialogDescription className="text-sm mt-1">
             Please fill in the form below to add a new patient to the hospital database.
           </DialogDescription>
         </DialogHeader>
@@ -156,8 +156,8 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
           {isSubmitted ? (
             <div className="flex flex-col items-center justify-center py-10 space-y-4">
               <CheckCircle2 className="w-16 h-16 text-green-500" />
-              <h2 className="text-2xl font-bold text-center text-white">Patient Added Successfully</h2>
-              <p className="text-center text-zinc-300">
+              <h2 className="text-2xl font-bold text-center">Patient Added Successfully</h2>
+              <p className="text-center">
                 The patient information has been successfully added to the database.
               </p>
             </div>
@@ -165,21 +165,18 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Personal Information</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="patient_first_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">First Name</FormLabel>
+                          <FormLabel className="">First Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Jane"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -196,9 +193,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                             <Input
                               placeholder="Dela Cruz"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -211,14 +205,11 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                     name="patient_date_of_birth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Date of Birth</FormLabel>
+                        <FormLabel>Date of Birth</FormLabel>
                         <FormControl>
                           <Input
                             type="date"
                             {...field}
-                            className={cn(
-                              "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                            )}
                           />
                         </FormControl>
                         <FormMessage className="text-red-400" />
@@ -228,20 +219,17 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Contact Information</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Contact Information</h3>
                   <FormField
                     control={form.control}
                     name="patient_address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Address</FormLabel>
+                        <FormLabel>Address</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Baybay City, Leyte"
                             {...field}
-                            className={cn(
-                              "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                            )}
                           />
                         </FormControl>
                         <FormMessage className="text-red-400" />
@@ -254,14 +242,11 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                       name="patient_phone_number"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Phone Number</FormLabel>
+                          <FormLabel>Phone Number</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="09123456789"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -278,9 +263,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                             <Input
                               placeholder="example@example.com"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -291,7 +273,7 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Emergency Contact</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Emergency Contact</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -303,9 +285,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                             <Input
                               placeholder="Juan Dela Cruz"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600"
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -317,14 +296,11 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                       name="patient_emergency_contact_phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Emergency Contact Phone</FormLabel>
+                          <FormLabel>Emergency Contact Phone</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="0987654321"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -335,21 +311,21 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Medical Information</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Medical Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="patient_bloodtype"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Blood Type</FormLabel>
+                        <FormLabel>Blood Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-zinc-800 border-zinc-600 text-white">
-                              <SelectValue placeholder="Select Blood Type" className="text-zinc-300" />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Blood Type" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                          <SelectContent>
                             <SelectItem value="A+">A+</SelectItem>
                             <SelectItem value="A-">A-</SelectItem>
                             <SelectItem value="B+">B+</SelectItem>
@@ -372,11 +348,11 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                         <FormLabel className="text-zinc-300">Status</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-zinc-800 border-zinc-600 text-white">
+                            <SelectTrigger>
                               <SelectValue placeholder="Select Status" className="text-zinc-300" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                          <SelectContent>
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="inactive">Inactive</SelectItem>
                           </SelectContent>
@@ -391,14 +367,11 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                     name="patient_medical_history"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Medical History</FormLabel>
+                        <FormLabel>Medical History</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Any relevant medical history"
                             {...field}
-                            className={cn(
-                              "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600 min-h-[100px]"
-                            )}
                           />
                         </FormControl>
                         <FormMessage className="text-red-400" />
@@ -411,9 +384,9 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
           )}
         </ScrollArea>
 
-        <DialogFooter className="flex justify-end pt-4 mt-4 border-t border-zinc-700">
+        <DialogFooter className="flex justify-end pt-4 mt-4 border-t ">
           <Button
-            className="bg-zinc-800 text-white font-semibold py-2 px-4 w-full rounded-md border border-zinc-600 hover:border-zinc-500 hover:bg-zinc-800 active:border-zinc-400 transition-transform duration-300 ease-in-out"
+            className="font-semibold py-2 px-4 w-full rounded-md border"
             onClick={() =>
               form.handleSubmit(async (values) => {
                 await handleSubmit(values)

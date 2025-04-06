@@ -31,7 +31,7 @@ export const SearchBar = () => {
           <Input
             type="text"
             placeholder="Search..."
-            className="bg-zinc-700 border-zinc-600 text-white placeholder:text-zinc-400 pr-10 w-full"
+            className="pr-10 w-full"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
           />

@@ -60,15 +60,15 @@ export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted }
       </Button>
 
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-        <AlertDialogContent className="bg-zinc-900 border border-zinc-700 text-white">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete Patient Record</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-300">
+            <AlertDialogTitle>Delete Patient Record</AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to delete {patientName}'s record? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700">
+            <AlertDialogCancel>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
