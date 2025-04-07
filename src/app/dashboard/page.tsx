@@ -23,6 +23,7 @@ interface Patient {
   patient_emergency_contact_phone: string
   patient_bloodtype: string
   patient_medical_history: string
+  patient_status: string
 }
 
 export default function Dashboard() {

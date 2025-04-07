@@ -188,13 +188,13 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                       name="patient_last_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Last Name</FormLabel>
-                          <FormControl>
+                          <FormLabel>Last Name</FormLabel>
+                            <FormControl>
                             <Input
                               placeholder="Dela Cruz"
                               {...field}
                             />
-                          </FormControl>
+                            </FormControl>
                           <FormMessage className="text-red-400" />
                         </FormItem>
                       )}
@@ -258,7 +258,7 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                       name="patient_email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Email</FormLabel>
+                          <FormLabel>Email</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="example@example.com"
@@ -280,7 +280,7 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                       name="patient_emergency_contact_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Emergency Contact Name</FormLabel>
+                          <FormLabel>Emergency Contact Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Juan Dela Cruz"
@@ -345,11 +345,11 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                     name="patient_status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Status</FormLabel>
+                        <FormLabel>Status</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Status" className="text-zinc-300" />
+                              <SelectValue placeholder="Select Status"/>
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -398,10 +398,10 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                SUBMITTING...
+                Submitting...
               </>
             ) : (
-              "SUBMIT"
+              "Submit Patient Information"
             )}
           </Button>
         </DialogFooter>

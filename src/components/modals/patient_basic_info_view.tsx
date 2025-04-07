@@ -27,6 +27,7 @@ interface Patient {
   patient_emergency_contact_phone: string
   patient_bloodtype: string
   patient_medical_history: string
+  patient_status: string
 }
 
 export default function PatientBasicInfoView({ trigger, patient, onFetchData }: { trigger: React.ReactNode; patient: Patient; onFetchData: () => void }) {
@@ -71,17 +72,17 @@ export default function PatientBasicInfoView({ trigger, patient, onFetchData }: 
     return (
         <Dialog>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-zinc-900 border border-zinc-700 text-white">
-                <DialogHeader className="pb-4 border-b border-zinc-700">
-                    <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-                        <User className="h-5 w-5 text-blue-500" />
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="pb-4 border-b">
+                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                        <User className="h-5 w-5 text-primary" />
                         {`${patient.patient_first_name} ${patient.patient_last_name}`}
                         <div className="pl-5 flex gap-2">
                             <PatientEditForm
                                 patient={patient}
                                 trigger={
                                     <div>
-                                        <Button className="bg-blue-400 text-white w-full hover:bg-blue-500 h-8">
+                                        <Button className="h-8">
                                             <Pencil size={12} />
                                             Edit
                                         </Button>
@@ -96,12 +97,12 @@ export default function PatientBasicInfoView({ trigger, patient, onFetchData }: 
                             />
                         </div>
                     </DialogTitle>
-                    <DialogDescription className="text-zinc-300 text-sm mt-1 flex items-center gap-2">
-                        <span className="bg-zinc-800 px-2 py-1 rounded text-xs font-medium">ID: {patient.patient_id}</span>
-                        <span className="bg-zinc-800 px-2 py-1 rounded text-xs font-medium">
+                    <DialogDescription className="text-sm mt-1 flex items-center gap-2">
+                        <span className="bg-zinc-200 px-2 py-1 rounded text-xs font-medium">ID: {patient.patient_id}</span>
+                        <span className="bg-zinc-200 px-2 py-1 rounded text-xs font-medium">
                             Age: {calculateAge(patient.patient_date_of_birth)}
                         </span>
-                        <span className="bg-zinc-800 px-2 py-1 rounded text-xs font-medium">
+                        <span className="bg-zinc-200 px-2 py-1 rounded text-xs font-medium">
                             Blood Type: {patient.patient_bloodtype}
                         </span>
                     </DialogDescription>
@@ -111,117 +112,138 @@ export default function PatientBasicInfoView({ trigger, patient, onFetchData }: 
                     <div className="space-y-6 px-3">
                         {/* Personal Information */}
                         <div className="space-y-3">
-                            <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2 flex items-center gap-2">
-                                <Users className="h-5 w-5 text-blue-500" />
+                            <h3 className="text-lg font-medium pb-2 flex items-center gap-2">
+                                <Users className="h-5 w-5 text-primary" />
                                 Personal Information
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <p className="text-zinc-400 text-sm">First Name</p>
-                                    <p className="text-white">{patient.patient_first_name}</p>
+                                    <p className="text-sm">First Name</p>
+                                    <p>{patient.patient_first_name}</p>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <p className="text-zinc-400 text-sm">Last Name</p>
-                                    <p className="text-white">{patient.patient_last_name}</p>
+                                    <p className="text-sm">Last Name</p>
+                                    <p>{patient.patient_last_name}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-1">
-                                <p className="text-zinc-400 text-sm flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-blue-500" />
+                                <p className=" text-sm flex items-center gap-2">
+                                    <Calendar className="h-4 w-4 text-primary" />
                                     Date of Birth
                                 </p>
-                                <p className="text-white">{formatDate(patient.patient_date_of_birth)}</p>
+                                <p>{formatDate(patient.patient_date_of_birth)}</p>
                             </div>
                         </div>
 
                         {/* Contact Information */}
                         <div className="space-y-3">
-                            <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2 flex items-center gap-2">
-                                <Phone className="h-5 w-5 text-blue-500" />
+                            <h3 className="text-lg font-medium border-b pb-2 flex items-center gap-2">
+                                <Phone className="h-5 w-5 text-primary" />
                                 Contact Information
                             </h3>
 
                             <div className="space-y-1">
-                                <p className="text-zinc-400 text-sm flex items-center gap-2">
-                                    <Home className="h-4 w-4 text-blue-500" />
+                                <p className=" text-sm flex items-center gap-2">
+                                    <Home className="h-4 w-4 text-primary" />
                                     Address
                                 </p>
-                                <p className="text-white">{patient.patient_address || "Not provided"}</p>
+                                <p>{patient.patient_address || "Not provided"}</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <p className="text-zinc-400 text-sm flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-blue-500" />
+                                    <p className=" text-sm flex items-center gap-2">
+                                        <Phone className="h-4 w-4 text-primary" />
                                         Phone Number
                                     </p>
-                                    <p className="text-white">{patient.patient_phone_number}</p>
+                                    <p>{patient.patient_phone_number}</p>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <p className="text-zinc-400 text-sm flex items-center gap-2">
-                                        <Mail className="h-4 w-4 text-blue-500" />
+                                    <p className="text-sm flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-primary" />
                                         Email
                                     </p>
-                                    <p className="text-white">{patient.patient_email || "Not provided"}</p>
+                                    <p>{patient.patient_email || "Not provided"}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Emergency Contact */}
                         <div className="space-y-3">
-                            <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2 flex items-center gap-2">
+                            <h3 className="text-lg font-medium border-b pb-2 flex items-center gap-2">
                                 <Clock className="h-5 w-5 text-red-500" />
                                 Emergency Contact
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <p className="text-zinc-400 text-sm">Name</p>
-                                    <p className="text-white">{patient.patient_emergency_contact_name}</p>
+                                    <p className="text-sm">Name</p>
+                                    <p>{patient.patient_emergency_contact_name}</p>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <p className="text-zinc-400 text-sm">Phone</p>
-                                    <p className="text-white">{patient.patient_emergency_contact_phone}</p>
+                                    <p className=" text-sm">Phone</p>
+                                    <p>{patient.patient_emergency_contact_phone}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Medical Information */}
                         <div className="space-y-3">
-                            <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2 flex items-center gap-2">
+                            <h3 className="text-lg font-medium border-b  pb-2 flex items-center gap-2">
                                 <Heart className="h-5 w-5 text-red-500" />
                                 Medical Information
                             </h3>
 
-                            <div className="space-y-1">
-                                <p className="text-zinc-400 text-sm">Blood Type</p>
-                                <p className="text-white">
-                                    <span className="bg-red-900/50 px-2 py-1 rounded text-sm font-medium">
-                                        {patient.patient_bloodtype}
-                                    </span>
-                                </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <p className="text-zinc-400 text-sm">Blood Type</p>
+                                    <p className="text-white">
+                                        <span className="bg-red-900 px-2 py-1 rounded text-sm font-medium">
+                                            {patient.patient_bloodtype}
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <p className=" text-sm">Patient Status</p>
+                                    <p>
+                                        <span className="px-2 py-1 text-sm font-medium">
+                                            {patient.patient_status === "active" ? (
+                                                <span className="bg-green-900 text-green-200 px-2 py-1 rounded">
+                                                    {patient.patient_status}
+                                                </span>
+                                            ) : (
+                                                <span className="bg-red-900 text-red-200 px-2 py-1 rounded">
+                                                    {patient.patient_status}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
 
+
                             <div className="space-y-1">
-                                <p className="text-zinc-400 text-sm flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-blue-500" />
+                                <p className=" text-sm flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-primary" />
                                     Medical History
                                 </p>
-                                <div className="bg-zinc-800 p-3 rounded-md text-white">
+                                <div className="p-3 rounded-md bg-accent">
                                     {patient.patient_medical_history || "No medical history recorded"}
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </ScrollArea>
 
-                <DialogFooter className="flex justify-end pt-4 mt-4 border-t border-zinc-700">
-                    <p className="text-xs text-zinc-400">Last updated: {format(new Date(), "MMMM d, yyyy")}</p>
+                <DialogFooter className="flex justify-end pt-4 mt-4 border-t">
+                    <p className="text-xs">Last updated: {format(new Date(), "MMMM d, yyyy")}</p>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

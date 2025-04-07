@@ -26,9 +26,6 @@ import { CheckCircle2, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
-// Custom styles for placeholders
-const placeholderStyles = "placeholder:text-zinc-300"
-
 const formSchema = z.object({
   patient_first_name: z.string().min(2, {
     message: "Firstname must be at least 2 characters.",
@@ -193,10 +190,10 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
       <DialogTrigger asChild onClick={() => setIsOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-zinc-900 border border-zinc-700">
-        <DialogHeader className="pb-4 border-b border-zinc-700">
-          <DialogTitle className="text-xl font-bold text-white">Edit Patient</DialogTitle>
-          <DialogDescription className="text-zinc-300 text-sm mt-1">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border">
+        <DialogHeader className="pb-4 border-b">
+          <DialogTitle className="text-xl font-bold">Edit Patient</DialogTitle>
+          <DialogDescription className="text-sm mt-1">
             Update information for {patient.patient_first_name} {patient.patient_last_name}
           </DialogDescription>
         </DialogHeader>
@@ -205,29 +202,25 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
           {isSubmitted ? (
             <div className="flex flex-col items-center justify-center py-10 space-y-4">
               <CheckCircle2 className="w-16 h-16 text-green-500" />
-              <h2 className="text-2xl font-bold text-center text-white">Patient Updated Successfully</h2>
-              <p className="text-center text-zinc-300">The patient information has been successfully updated.</p>
+              <h2 className="text-2xl font-bold text-center ">Patient Updated Successfully</h2>
+              <p className="text-center">The patient information has been successfully updated.</p>
             </div>
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Personal Information</h3>
+                  <h3 className="text-lg font-medium  border-b pb-2">Personal Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="patient_first_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">First Name</FormLabel>
+                          <FormLabel>First Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Jane"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                                placeholderStyles,
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -239,15 +232,11 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                       name="patient_last_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Last Name</FormLabel>
+                          <FormLabel>Last Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Dela Cruz"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                                placeholderStyles,
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -260,15 +249,12 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                     name="patient_date_of_birth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Date of Birth</FormLabel>
+                        <FormLabel>Date of Birth</FormLabel>
                         <FormControl>
                           <Input
                             type="date"
                             {...field}
-                            className={cn(
-                              "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                              placeholderStyles,
-                            )}
+
                           />
                         </FormControl>
                         <FormMessage className="text-red-400" />
@@ -278,21 +264,18 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Contact Information</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Contact Information</h3>
                   <FormField
                     control={form.control}
                     name="patient_address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-zinc-300">Address</FormLabel>
+                        <FormLabel>Address</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Baybay City, Leyte"
                             {...field}
-                            className={cn(
-                              "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                              placeholderStyles,
-                            )}
+  
                           />
                         </FormControl>
                         <FormMessage className="text-red-400" />
@@ -305,15 +288,10 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                       name="patient_phone_number"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Phone Number</FormLabel>
+                          <FormLabel>Phone Number</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="09123456789"
-                              {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                                placeholderStyles,
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -325,15 +303,11 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                       name="patient_email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Email</FormLabel>
+                          <FormLabel>Email</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="example@example.com"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                                placeholderStyles,
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -344,22 +318,18 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Emergency Contact</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Emergency Contact</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="patient_emergency_contact_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Emergency Contact Name</FormLabel>
+                          <FormLabel>Emergency Contact Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Juan Dela Cruz"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                                placeholderStyles,
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -371,15 +341,11 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                       name="patient_emergency_contact_phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-300">Emergency Contact Phone</FormLabel>
+                          <FormLabel>Emergency Contact Phone</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="0987654321"
                               {...field}
-                              className={cn(
-                                "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600",
-                                placeholderStyles,
-                              )}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />
@@ -390,79 +356,72 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Medical Information</h3>
+                  <h3 className="text-lg font-medium border-b pb-2">Medical Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="patient_bloodtype"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-zinc-300">Blood Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-zinc-800 border-zinc-600 text-white">
-                              <SelectValue placeholder="Select Blood Type" className="text-zinc-300" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                            <SelectItem value="A+">A+</SelectItem>
-                            <SelectItem value="A-">A-</SelectItem>
-                            <SelectItem value="B+">B+</SelectItem>
-                            <SelectItem value="B-">B-</SelectItem>
-                            <SelectItem value="AB+">AB+</SelectItem>
-                            <SelectItem value="AB-">AB-</SelectItem>
-                            <SelectItem value="O+">O+</SelectItem>
-                            <SelectItem value="O-">O-</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
+                    <FormItem>
+                      <FormLabel>Blood Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select Blood Type"/>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="A+">A+</SelectItem>
+                        <SelectItem value="A-">A-</SelectItem>
+                        <SelectItem value="B+">B+</SelectItem>
+                        <SelectItem value="B-">B-</SelectItem>
+                        <SelectItem value="AB+">AB+</SelectItem>
+                        <SelectItem value="AB-">AB-</SelectItem>
+                        <SelectItem value="O+">O+</SelectItem>
+                        <SelectItem value="O-">O-</SelectItem>
+                      </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="patient_medical_history"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-zinc-300">Medical History</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Any relevant medical history"
-                            {...field}
-                            className={cn(
-                              "bg-zinc-900 border-zinc-600 text-white focus:ring-blue-600 focus:border-blue-600 min-h-[100px]",
-                              placeholderStyles,
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Patient Status Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white border-b border-zinc-700 pb-2">Patient Status</h3>
                   <FormField
                     control={form.control}
                     name="patient_status"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-zinc-300">Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-zinc-800 border-zinc-600 text-white">
-                              <SelectValue placeholder="Select Status" className="text-zinc-300" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
                     )}
+                  />
+                  </div>
+                  <FormField
+                  control={form.control}
+                  name="patient_medical_history"
+                  render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Medical History</FormLabel>
+                    <FormControl>
+                      <Textarea
+                      placeholder="Any relevant medical history"
+                      {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
                   />
                 </div>
               </form>
@@ -472,7 +431,7 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
 
         <DialogFooter className="flex justify-end pt-4 mt-4 border-t border-zinc-700">
           <Button
-            className="bg-zinc-800 text-white font-semibold py-2 px-4 w-full rounded-md border border-zinc-600 hover:border-zinc-500 hover:bg-zinc-800 active:border-zinc-400 transition-transform duration-300 ease-in-out"
+            className="font-semibold py-2 px-4 w-full rounded-md border"
             onClick={() =>
               form.handleSubmit(async (values) => {
                 await handleSubmit(values)
