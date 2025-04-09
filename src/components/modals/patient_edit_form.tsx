@@ -15,7 +15,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { supabase } from "@/lib/supabase"
+import { createClient } from '@supabase/supabase-js'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 const formSchema = z.object({
@@ -83,6 +82,11 @@ interface PatientEditFormProps {
   patient: Patient
   onPatientUpdated?: () => void
 }
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientEditFormProps) {
   const [isOpen, setIsOpen] = useState(false)
