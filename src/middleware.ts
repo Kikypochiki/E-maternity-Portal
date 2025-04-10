@@ -17,15 +17,39 @@ export async function middleware(request: NextRequest) {
     console.log("Middleware session check:", session ? "Session found" : "No session")
 
     // If no session and trying to access protected routes
-    if (
-      !session &&
-      (request.nextUrl.pathname.startsWith("/patient") || request.nextUrl.pathname.startsWith("/admin/dashboard"))
-    ) {
+    if (!session) {
+      if (
+      request.nextUrl.pathname.startsWith("/patient") ||
+      request.nextUrl.pathname.startsWith("/admin/dashboard")
+      ) {
       // Redirect to login
       const redirectUrl = new URL("/auth_admin/login", request.url)
       // Add the original URL as a query parameter to redirect back after login
       redirectUrl.searchParams.set("redirectedFrom", request.nextUrl.pathname)
       return NextResponse.redirect(redirectUrl)
+      }
+    } else {
+      // Check the user's role from the role_user table
+      const { data: userRole, error } = await supabase
+      .from("role_user")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .single()
+
+      if (error || !userRole) {
+      console.error("Error fetching user role:", error)
+      const redirectUrl = new URL("/auth_admin/login", request.url)
+      return NextResponse.redirect(redirectUrl)
+      }
+
+      // Redirect based on the user's role
+      if (userRole.role === "patient" && !request.nextUrl.pathname.startsWith("/patient")) {
+      const redirectUrl = new URL("/patient", request.url)
+      return NextResponse.redirect(redirectUrl)
+      } else if (userRole.role === "admin" && !request.nextUrl.pathname.startsWith("/admin/dashboard")) {
+      const redirectUrl = new URL("/admin/dashboard", request.url)
+      return NextResponse.redirect(redirectUrl)
+      }
     }
 
     return res

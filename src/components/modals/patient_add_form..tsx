@@ -143,7 +143,7 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
       <DialogTrigger asChild onClick={() => setIsOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-xl max-h-1xl overflow-hidden flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-xl font-bold">Add Patient</DialogTitle>
           <DialogDescription className="text-sm mt-1">

@@ -72,7 +72,7 @@ export default function PatientBasicInfoView({ trigger, patient, onFetchData }: 
     return (
         <Dialog>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogContent className="sm:max-w-xl max-h-1xl overflow-hidden flex flex-col">
                 <DialogHeader className="pb-4 border-b">
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
                         <User className="h-5 w-5 text-primary" />
