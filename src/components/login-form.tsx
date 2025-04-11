@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
-export function LoginFormAdmin({ className, ...props }: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -101,16 +101,18 @@ export function LoginFormAdmin({ className, ...props }: React.ComponentProps<"di
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
-                <Button variant="outline" className="w-full" type="button" disabled={isLoading}>
-                  Login with Google
-                </Button>
               </div>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              <p>
               Don&apos;t have an account?{" "}
-              <a href="/auth_admin/signup" className="underline underline-offset-4">
+              <a
+                href="/auth_admin/signup_patient"
+                className="font-medium text-primary hover:underline"
+              >
                 Sign up
               </a>
+              </p>
             </div>
           </form>
         </CardContent>

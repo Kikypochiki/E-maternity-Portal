@@ -152,17 +152,19 @@ export function SignupFormAdmin({
                                 <Button type="submit" className="w-full">
                                     {signupText}
                                 </Button>
-                                <Button variant="outline" className="w-full">
-                                    {googleText}
-                                </Button>
                             </div>
                         </div>
-                        <div className="mt-4 text-center text-sm">
-                            {loginText}{" "}
-                            <a href={loginUrl} className="underline underline-offset-4">
-                                Login
-                            </a>
-                        </div>
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+                <p>
+                {loginText}{" "}
+                <a
+                    href={loginUrl}
+                    className="font-medium text-primary hover:underline"
+                >
+                    Login
+                </a>
+                </p>
+            </div>
                     </form>
                 </CardContent>
             </Card>

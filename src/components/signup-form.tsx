@@ -99,7 +99,7 @@ export function SignupForm({
   signupText = "Sign up",
   googleText = "Sign up with Google",
   loginText = "Already have an account?",
-  loginUrl = "/auth/login",
+  loginUrl = "/auth_admin/login",
   ...props
 }: SignupFormProps) {
   const [email, setEmail] = useState("");
@@ -172,16 +172,27 @@ export function SignupForm({
                 <Button type="submit" className="w-full">
                   {signupText}
                 </Button>
-                <Button variant="outline" className="w-full">
-                  {googleText}
-                </Button>
               </div>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              <p>
               {loginText}{" "}
-              <a href={loginUrl} className="underline underline-offset-4">
+              <a
+                href={loginUrl}
+                className="font-medium text-primary hover:underline"
+              >
                 Login
               </a>
+              </p>
+              <p className="mt-2">
+              Want to manage the portal?{" "}
+              <a
+                href="/auth_admin/signup"
+                className="font-medium text-primary hover:underline"
+              >
+                Sign up as Admin
+              </a>
+              </p>
             </div>
           </form>
         </CardContent>
