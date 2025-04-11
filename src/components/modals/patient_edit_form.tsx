@@ -433,7 +433,7 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
           )}
         </ScrollArea>
 
-        <DialogFooter className="flex justify-end pt-4 mt-4 border-t border-zinc-700">
+        <DialogFooter className="flex justify-end pt-4 mt-4 border-t">
           <Button
             className="font-semibold py-2 px-4 w-full rounded-md border"
             onClick={() =>
