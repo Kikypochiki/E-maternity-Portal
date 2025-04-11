@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/ui/search-bar";
 import { Toaster } from "sonner";
+import { headerProfile as HeaderProfile } from "@/components/ui/header-profile";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b border-color-border sticky top-0 z-50">
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b sticky top-0 z-50">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
@@ -45,6 +46,9 @@ export default function DashboardLayout({
             </div>
             <div className="flex">
               <SearchBar />
+            </div>
+            <div className="flex ml-auto" >
+            <HeaderProfile />
             </div>
           </header>
           {children}

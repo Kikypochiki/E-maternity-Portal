@@ -54,7 +54,7 @@ const data = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props} variant="floating">
       <SidebarHeader>
         <div className="flex items-center gap-1">
           <Image
@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data} />
       </SidebarContent>
       <SidebarFooter className="">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4 ml-2 mr-2">
           <div className="text-sm group-data-[collapsible=icon]:hidden">E-Maternity Portal</div>
           <div className="text-xs group-data-[collapsible=icon]:hidden">Version 1.0.0</div>
         </div>

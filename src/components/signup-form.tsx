@@ -1,7 +1,7 @@
 "use client"
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import {
   Card,
   CardContent,
@@ -22,9 +22,13 @@ interface SignupFormProps extends React.ComponentProps<"div"> {
   loginText?: string;
   loginUrl?: string;
 }
+const serviceSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
+);
 
 async function patientSignUp(email: string, password: string, patientId: string) {
-  const { data: patientData, error: patientError } = await supabase
+  const { data: patientData, error: patientError } = await serviceSupabase
     .from("patient_basic_info")
     .select("patient_id")
     .eq("patient_id", patientId)
@@ -37,7 +41,7 @@ async function patientSignUp(email: string, password: string, patientId: string)
   }
 
   // Proceed with signup if patient_id is valid
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await serviceSupabase.auth.signUp({
     email: email,
     password: password,
     options: {
@@ -57,7 +61,7 @@ async function patientSignUp(email: string, password: string, patientId: string)
 
   if (data.user) {
     // Update the patient_basic_info table with the new user_id
-    const { error: updateError } = await supabase
+    const { error: updateError } = await serviceSupabase
       .from("patient_basic_info")
       .update({ user_id: data.user.id })
       .eq("patient_id", patientId);
@@ -72,7 +76,7 @@ async function patientSignUp(email: string, password: string, patientId: string)
   }
   
       if (data.user) {
-        const { error: roleError } = await supabase
+        const { error: roleError } = await serviceSupabase
           .from("role_user")
           .insert({
             user_id: data.user.id,

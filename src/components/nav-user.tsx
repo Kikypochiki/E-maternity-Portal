@@ -1,114 +1,153 @@
 "use client"
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react"
+import type React from "react"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
+import { ChevronDown, LogOut, User, Settings, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
+interface NavUserProps {
+  profile: {
+    first_name: string
+    last_name: string
+    position: string
   }
-}) {
-  const { isMobile } = useSidebar()
+}
+
+const defaultProfile = {
+  first_name: "",
+  last_name: "",
+  position: "",
+}
+
+export default function NavUser({
+  profile = defaultProfile,
+  ...props
+}: NavUserProps & React.HTMLAttributes<HTMLDivElement>) {
+  const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const supabase = createClient()
+const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true)
+
+      // First check if there's an active session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session) {
+        // Only attempt to sign out if there's an active session
+        const { error } = await supabase.auth.signOut()
+        if (error && error.message !== "Auth session missing!") {
+          console.error("Error signing out:", error.message)
+          toast?.("There was a problem logging out. Please try again.")
+        }
+      } else {
+        console.log("No active session found, proceeding with logout flow")
+      }
+
+      // Clear any local storage items related to auth
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("supabase.auth.token")
+        // Clear any other auth-related items you might have
+      }
+
+      // Show success message
+      toast?.( "You have been successfully logged out.")
+
+      // Force a refresh to clear any auth state in memory
+      router.refresh()
+
+      // Redirect to login page
+      router.push("/auth_admin/login")
+    } catch (error) {
+      console.error("Unexpected error during logout:", error)
+
+      // Even if there's an error, we should still redirect to login
+      router.push("/auth_admin/login")
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  // Get initials for avatar
+  const getInitials = () => {
+    if (profile.first_name && profile.last_name) {
+      return `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase()
+    }
+    return "U"
+  }
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+    <div className="flex items-center justify-between p-2 mt-auto text-sm gap-3" {...props}>
+      <div className="hidden sm:flex items-end flex-col">
+        <div className="flex flex-col overflow-hidden">
+          <h2 className="text-xs font-semibold truncate">
+          {`${profile.first_name} ${profile.last_name}` || "User"}
+          </h2>
+        </div>
+      <p className="text-xs truncate">{profile.position || "Staff"}</p>
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Avatar className="h-7 w-7 border cursor-pointer">
+            <AvatarFallback>{getInitials()}</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 text-xs">
+        <DropdownMenuLabel>
+        {`${profile.first_name} ${profile.last_name}` || "User"}
+        <p className="text-xs truncate">{profile.position || "Staff"}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+        className="cursor-pointer flex items-center"
+        onClick={() => router.push("/profile")}
+        >
+        <User className="mr-2 h-3 w-3" />
+        <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+        className="cursor-pointer flex items-center"
+        onClick={() => router.push("/settings")}
+        >
+        <Settings className="mr-2 h-3 w-3" />
+        <span>Settings</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+        className="cursor-pointer flex items-center"
+        onClick={handleLogout}
+        disabled={isLoggingOut}
+        >
+        {isLoggingOut ? (
+          <>
+          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+          <span>Logging out...</span>
+          </>
+        ) : (
+          <>
+          <LogOut className="mr-2 h-3 w-3" />
+          <span>Logout</span>
+          </>
+        )}
+        </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
