@@ -2,8 +2,8 @@
 import { Plus } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import PatientCard from "@/components/patient_card"
-import { useState, useEffect, Suspense } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client" // Make sure this import is correct
 import { Button } from "@/components/ui/button"
 import { PatientAddForm } from "@/components/modals/patient_add_form."
 import PatientBasicInfoView from "@/components/modals/patient_basic_info_view"
@@ -24,11 +24,12 @@ interface Patient {
   patient_status: string
 }
 
-function DashboardContent() {
+export default function Dashboard() {
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get("query") || ""
   const router = useRouter()
 
+  // Initialize Supabase client
   const supabase = createClient()
 
   const [patients, setPatients] = useState<Patient[]>([])
@@ -39,6 +40,7 @@ function DashboardContent() {
     try {
       setIsLoading(true)
 
+      // Check if user is authenticated before fetching data
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -56,6 +58,7 @@ function DashboardContent() {
       if (error) {
         console.log(error)
 
+        // If unauthorized error, redirect to login
         if (error.code === "PGRST301" || error.code === "401") {
           router.push("/auth_admin/login")
         }
@@ -87,6 +90,7 @@ function DashboardContent() {
   }, [searchQuery, patients])
 
   useEffect(() => {
+    // Check authentication on component mount
     const checkAuth = async () => {
       const {
         data: { session },
@@ -100,14 +104,17 @@ function DashboardContent() {
 
     checkAuth()
 
+    // Set up auth state listener to handle session changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || !session) {
+        // If signed out event is detected, redirect to login
         router.push("/auth_admin/login")
       }
     })
 
+    // Clean up subscription when component unmounts
     return () => {
       subscription.unsubscribe()
     }
@@ -147,7 +154,7 @@ function DashboardContent() {
           <div className="flex justify-center items-center h-40">
             {searchQuery ? (
               <div className="text-center">
-                <p>No patients found matching "{searchQuery}"</p>
+                <p>No patients found matching &quot;{searchQuery}&quot;</p>
                 <p className=" text-sm mt-2">Try a different search term</p>
               </div>
             ) : (
@@ -169,13 +176,5 @@ function DashboardContent() {
         )}
       </div>
     </div>
-  )
-}
-
-export default function Dashboard() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DashboardContent />
-    </Suspense>
   )
 }
