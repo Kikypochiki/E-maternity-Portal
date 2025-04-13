@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { ChevronDown, LogOut, User, Settings, Loader2 } from "lucide-react"
+import { LogOut, Settings, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import {
   DropdownMenu,
@@ -116,19 +116,11 @@ const handleLogout = async () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem
         className="cursor-pointer flex items-center"
-        onClick={() => router.push("/profile")}
-        >
-        <User className="mr-2 h-3 w-3" />
-        <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-        className="cursor-pointer flex items-center"
         onClick={() => router.push("/settings")}
         >
         <Settings className="mr-2 h-3 w-3" />
-        <span>Settings</span>
+        <span>Profile Settings</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem
         className="cursor-pointer flex items-center"
         onClick={handleLogout}

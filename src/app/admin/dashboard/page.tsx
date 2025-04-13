@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { PatientAddForm } from "@/components/modals/patient_add_form."
 import PatientBasicInfoView from "@/components/modals/patient_basic_info_view"
 import { useSearchParams, useRouter } from "next/navigation"
-import { toast } from "sonner"
 
 interface Patient {
   patient_id: string
