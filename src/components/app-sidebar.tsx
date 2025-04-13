@@ -16,7 +16,7 @@ import Image from "next/image";
 const data = [
   {
     title: "Dashboard",
-    url: "#",
+    url: "admin/dashbaord",
     icon: LayoutDashboard,
   },
   {
