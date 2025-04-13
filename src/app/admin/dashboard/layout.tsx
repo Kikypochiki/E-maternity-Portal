@@ -6,7 +6,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/ui/search-bar";
 import { Toaster } from "sonner";
-import { headerProfile as HeaderProfile } from "@/components/ui/header-profile";
+import { HeaderProfile as HeaderProfile } from "@/components/ui/header-profile";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
