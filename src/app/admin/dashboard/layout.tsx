@@ -4,7 +4,6 @@ import "../../globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator";
-import { SearchBar } from "@/components/ui/search-bar";
 import { Toaster } from "sonner";
 import { HeaderProfile as HeaderProfile } from "@/components/ui/header-profile";
 
@@ -45,7 +44,6 @@ export default function DashboardLayout({
               />
             </div>
             <div className="flex">
-              <SearchBar />
             </div>
             <div className="flex ml-auto" >
             <HeaderProfile />
