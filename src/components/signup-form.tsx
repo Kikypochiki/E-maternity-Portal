@@ -18,7 +18,6 @@ interface SignupFormProps extends React.ComponentProps<"div"> {
   heading?: string;
   subheading?: string;
   signupText?: string;
-  googleText?: string;
   loginText?: string;
   loginUrl?: string;
 }
@@ -101,7 +100,6 @@ export function SignupForm({
   heading = "Create a new account",
   subheading = "Enter your details below to sign up",
   signupText = "Sign up",
-  googleText = "Sign up with Google",
   loginText = "Already have an account?",
   loginUrl = "/auth_admin/login",
   ...props

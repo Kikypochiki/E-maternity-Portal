@@ -64,7 +64,7 @@ export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted }
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Patient Record</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {patientName}'s record? This action cannot be undone.
+              Are you sure you want to delete {patientName}&#39;s record? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

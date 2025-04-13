@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button" // Adjust the path based on your
 export default function Patient() {
   const router = useRouter()
 
-  const [isLoggingOut, setIsLoggingOut] = React.useState(false)
+  const [isLoggingOut, setIsLoggingOut] = React.useState<boolean>(false)
 
   // Initialize Supabase client
   const supabase = createClient()
@@ -47,7 +47,7 @@ export default function Patient() {
 
       // Redirect to login page
       router.push("/auth_admin/login")
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Unexpected error during logout:", error)
 
       // Even if there's an error, we should still redirect to login
@@ -60,11 +60,8 @@ export default function Patient() {
   return (
     <div>
       <h1>Patient</h1>
-      <Button onClick={handleLogout}>Logout</Button>
+      <Button onClick={handleLogout} disabled={isLoggingOut}>Logout</Button>
     </div>
   )
-}
-function useState(arg0: boolean): [any, any] {
-  throw new Error("Function not implemented.")
 }
 

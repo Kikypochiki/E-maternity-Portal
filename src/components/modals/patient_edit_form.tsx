@@ -122,7 +122,7 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
         patient_email: patient.patient_email || "",
         patient_emergency_contact_name: patient.patient_emergency_contact_name,
         patient_emergency_contact_phone: patient.patient_emergency_contact_phone,
-        patient_bloodtype: patient.patient_bloodtype as any,
+        patient_bloodtype: patient.patient_bloodtype as z.infer<typeof formSchema>["patient_bloodtype"],
         patient_medical_history: patient.patient_medical_history || "",
       })
     }
@@ -296,6 +296,7 @@ export function PatientEditForm({ trigger, patient, onPatientUpdated }: PatientE
                           <FormControl>
                             <Input
                               placeholder="09123456789"
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage className="text-red-400" />

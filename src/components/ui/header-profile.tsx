@@ -15,7 +15,7 @@ interface Profile {
   }
   
 
-export function headerProfile() {
+export function HeaderProfile() {
       const [userProfile, setUserProfile] = React.useState<Profile>(defaultProfile)
       const supabase = createClient()
       

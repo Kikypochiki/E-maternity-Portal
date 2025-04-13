@@ -36,7 +36,7 @@ export default function PatientBasicInfoView({ trigger, patient, onFetchData }: 
         try {
             const date = new Date(dateString)
             return isNaN(date.getTime()) ? dateString : format(date, "MMMM d, yyyy")
-        } catch (error) {
+        } catch {
             return dateString
         }
     }
@@ -56,7 +56,7 @@ export default function PatientBasicInfoView({ trigger, patient, onFetchData }: 
             }
 
             return age
-        } catch (error) {
+        } catch {
             return "N/A"
         }
     }

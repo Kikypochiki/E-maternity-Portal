@@ -91,7 +91,6 @@ export function SignupFormAdmin({
     heading = "Create an admin account",
     subheading = "Enter your details below to sign up as an admin",
     signupText = "Sign up",
-    googleText = "Sign up with Google",
     loginText = "Already have an account?",
     loginUrl = "/auth_admin/login",
     ...props

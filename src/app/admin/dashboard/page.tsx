@@ -28,7 +28,7 @@ export default function Dashboard() {
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get("query") || ""
   const router = useRouter()
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
 
   // Initialize Supabase client
   const supabase = createClient()
@@ -119,7 +119,7 @@ export default function Dashboard() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [fetchData, router, supabase.auth])
 
   return (
     <div className="flex flex-col container w-full mx-auto pt-5">
@@ -155,7 +155,7 @@ export default function Dashboard() {
           <div className="flex justify-center items-center h-40">
             {searchQuery ? (
               <div className="text-center">
-                <p>No patients found matching "{searchQuery}"</p>
+                <p>No patients found matching &quot;{searchQuery}&quot;</p>
                 <p className=" text-sm mt-2">Try a different search term</p>
               </div>
             ) : (
