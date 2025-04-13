@@ -2,8 +2,8 @@
 import { Plus } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import PatientCard from "@/components/patient_card"
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client" // Make sure this import is correct
+import { useState, useEffect, Suspense } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { PatientAddForm } from "@/components/modals/patient_add_form."
 import PatientBasicInfoView from "@/components/modals/patient_basic_info_view"
@@ -24,52 +24,16 @@ interface Patient {
   patient_status: string
 }
 
-export default function Dashboard() {
+function PatientDashboardContent({
+  patients,
+  fetchData,
+}: {
+  patients: Patient[]
+  fetchData: () => void
+}) {
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get("query") || ""
-  const router = useRouter()
-
-
-  // Initialize Supabase client
-  const supabase = createClient()
-
-  const [patients, setPatients] = useState<Patient[]>([])
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-
-  const fetchData = async () => {
-    try {
-      setIsLoading(true)
-
-      // Check if user is authenticated before fetching data
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session) {
-        console.log("No active session, redirecting to login")
-        router.push("/auth_admin/login")
-        return
-      }
-
-      const { data: patients, error } = await supabase.from("patient_basic_info").select("*")
-      if (patients) {
-        setPatients(patients)
-      }
-      if (error) {
-        console.log(error)
-
-        // If unauthorized error, redirect to login
-        if (error.code === "PGRST301" || error.code === "401") {
-          router.push("/auth_admin/login")
-        }
-      }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   useEffect(() => {
     if (!searchQuery) {
@@ -90,39 +54,8 @@ export default function Dashboard() {
     setFilteredPatients(filtered)
   }, [searchQuery, patients])
 
-  useEffect(() => {
-    // Check authentication on component mount
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) {
-        router.push("/auth_admin/login")
-      } else {
-        fetchData()
-      }
-    }
-
-    checkAuth()
-
-    // Set up auth state listener to handle session changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
-        // If signed out event is detected, redirect to login
-        router.push("/auth_admin/login")
-      }
-    })
-
-    // Clean up subscription when component unmounts
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [fetchData, router, supabase.auth])
-
   return (
-    <div className="flex flex-col container w-full mx-auto pt-5">
+    <>
       <div className="flex flex-row h-4 m-5">
         <div className="flex items-center">
           <h1 className="sm:text-2xl text-xl m-2">Patient Dashboard</h1>
@@ -147,11 +80,7 @@ export default function Dashboard() {
             <h1 className="sm:text-lg sm:text-md w-full font-bold">Status</h1>
           </div>
         </div>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-40">
-            <p>Loading patients...</p>
-          </div>
-        ) : filteredPatients.length === 0 ? (
+        {filteredPatients.length === 0 ? (
           <div className="flex justify-center items-center h-40">
             {searchQuery ? (
               <div className="text-center">
@@ -176,6 +105,83 @@ export default function Dashboard() {
           </ScrollArea>
         )}
       </div>
+    </>
+  )
+}
+
+export default function Dashboard() {
+  const router = useRouter()
+  const supabase = createClient()
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true)
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.push("/auth_admin/login")
+        return
+      }
+
+      const { data: patients, error } = await supabase.from("patient_basic_info").select("*")
+      if (patients) {
+        setPatients(patients)
+      }
+      if (error) {
+        if (error.code === "PGRST301" || error.code === "401") {
+          router.push("/auth_admin/login")
+        }
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session) {
+        router.push("/auth_admin/login")
+      } else {
+        fetchData()
+      }
+    }
+
+    checkAuth()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        router.push("/auth_admin/login")
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [fetchData, router, supabase.auth])
+
+  return (
+    <div className="flex flex-col container w-full mx-auto pt-5">
+      {isLoading ? (
+        <div className="flex justify-center items-center h-40">
+          <p>Loading patients...</p>
+        </div>
+      ) : (
+        <Suspense fallback={<div>Loading search...</div>}>
+          <PatientDashboardContent patients={patients} fetchData={fetchData} />
+        </Suspense>
+      )}
     </div>
   )
 }
