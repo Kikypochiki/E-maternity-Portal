@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+function LoginFormContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -28,7 +28,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     setIsLoading(true)
 
     try {
-      // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -40,14 +39,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         return
       }
 
-      // Successful login
       console.log("Login successful:", data)
-      toast( "You have been logged in successfully.")
+      toast("You have been logged in successfully.")
 
-      // Force a refresh to ensure the session is available
       router.refresh()
 
-      // Wait a moment to ensure session is set
       setTimeout(() => {
         router.push(redirectPath)
       }, 500)
@@ -60,7 +56,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
@@ -105,18 +101,28 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             </div>
             <div className="mt-6 text-center text-sm text-muted-foreground">
               <p>
-              Don&apos;t have an account?{" "}
-              <a
-                href="/auth_admin/signup_patient"
-                className="font-medium text-primary hover:underline"
-              >
-                Sign up
-              </a>
+                Don&apos;t have an account?{" "}
+                <a
+                  href="/auth_admin/signup_patient"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Sign up
+                </a>
               </p>
             </div>
           </form>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginFormContent />
+      </Suspense>
     </div>
   )
 }
