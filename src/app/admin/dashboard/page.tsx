@@ -2,7 +2,7 @@
 import { Plus } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import PatientCard from "@/components/patient_card"
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client" // Make sure this import is correct
 import { Button } from "@/components/ui/button"
 import { PatientAddForm } from "@/components/modals/patient_add_form."
@@ -31,13 +31,9 @@ export default function Dashboard() {
   const supabase = createClient()
 
   const [patients, setPatients] = useState<Patient[]>([])
-  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
 
   const fetchData = async () => {
     try {
-      setIsLoading(true)
 
       // Check if user is authenticated before fetching data
       const {
@@ -65,28 +61,9 @@ export default function Dashboard() {
     } catch (error) {
       console.log(error)
     } finally {
-      setIsLoading(false)
     }
   }
 
-  useEffect(() => {
-    if (!searchQuery) {
-      setFilteredPatients(patients)
-      return
-    }
-
-    const query = searchQuery.toLowerCase()
-    const filtered = patients.filter(
-      (patient) =>
-        patient.patient_first_name.toLowerCase().includes(query) ||
-        patient.patient_last_name.toLowerCase().includes(query) ||
-        patient.patient_id.toLowerCase().includes(query) ||
-        patient.patient_email.toLowerCase().includes(query) ||
-        patient.patient_phone_number.includes(query),
-    )
-
-    setFilteredPatients(filtered)
-  }, [searchQuery, patients])
 
   useEffect(() => {
     // Check authentication on component mount
@@ -120,7 +97,6 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
       <div className="flex flex-col container w-full mx-auto pt-5">
         <div className="flex flex-row h-4 m-5">
           <div className="flex items-center">
@@ -146,24 +122,8 @@ export default function Dashboard() {
               <h1 className="sm:text-lg sm:text-md w-full font-bold">Status</h1>
             </div>
           </div>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <p>Loading patients...</p>
-            </div>
-          ) : filteredPatients.length === 0 ? (
-            <div className="flex justify-center items-center h-40">
-              {searchQuery ? (
-                <div className="text-center">
-                  <p>No patients found matching &quot;{searchQuery}&quot;</p>
-                  <p className=" text-sm mt-2">Try a different search term</p>
-                </div>
-              ) : (
-                <p>No patients found. Add a patient to get started.</p>
-              )}
-            </div>
-          ) : (
             <ScrollArea className="w-full">
-              {filteredPatients.map((patient) => (
+              {patients.map((patient) => (
                 <div key={patient.patient_id}>
                   <PatientBasicInfoView
                     trigger={<PatientCard patient={patient} />}
@@ -173,9 +133,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </ScrollArea>
-          )}
         </div>
       </div>
-    </Suspense>
   )
 }
