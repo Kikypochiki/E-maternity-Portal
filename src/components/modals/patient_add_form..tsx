@@ -2,15 +2,6 @@
 
 import type React from "react"
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog"
 import { supabase } from "@/lib/supabase"
 import { useState, useEffect } from "react"
 import { z } from "zod"
@@ -23,43 +14,51 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle2, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
+const generatePatientId = () => {
+  const prefix = "PT-"
+  const randomNum = Math.floor(Math.random() * 1000000000)
+  return `${prefix}${randomNum.toString().padStart(6, "0")}`
+}
 
 const formSchema = z.object({
-  patient_first_name: z.string().min(2, {
-    message: "Firstname must be at least 2 characters.",
-  }),
-  patient_last_name: z.string().min(2, {
+  last_name: z.string().min(2, {
     message: "Lastname must be at least 2 characters.",
   }),
-  patient_date_of_birth: z.string().refine((value) => !isNaN(Date.parse(value)), {
-    message: "Date of birth must be a valid date.",
+  first_name: z.string().min(2, {
+    message: "Firstname must be at least 2 characters.",
   }),
-  patient_address: z.string().min(5, {
-    message: "Address must be at least 5 characters.",
+  middle_initial: z.string().min(1, {
+    message: "Middle initial must be at least 1 character.",
   }),
-  patient_phone_number: z.string().min(10, {
-    message: "Phone number must be at least 10 characters.",
+  date_of_birth: z.string().min(1, {
+    message: "Date of birth is required.",
   }),
-  patient_email: z
-    .string()
-    .email({
-      message: "Email must be a valid email address.",
-    })
-    .optional(),
-  patient_emergency_contact_name: z.string().min(2, {
-    message: "Emergency contact name must be at least 2 characters.",
+  sex: z.string().min(1, {
+    message: "Sex is required.",
   }),
-  patient_emergency_contact_phone: z.string().min(10, {
-    message: "Emergency contact phone number must be at least 10 characters.",
+  permanent_address: z.string().min(1, {
+    message: "Permanent address is required.",
   }),
-  patient_bloodtype: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], {
-    required_error: "Please select a bloodtype.",
+  contact_number: z.string().min(11, {
+    message: "Contact number is required.",
   }),
-  patient_medical_history: z.string().optional(),
-  patient_status: z.enum(["active", "inactive"], {
-    required_error: "Please select a status.",
+  civil_status: z.enum(["Single", "Married", "Divorced", "Widowed"], {
+    errorMap: () => ({ message: "Civil status is required." }),
   }),
+  religion: z.string().min(1, {
+    message: "Religion is required.",
+  }),
+  birthplace: z.string().min(1, {
+    message: "Birthplace is required.",
+  }),
+  nationality: z.string().min(1, {
+    message: "Nationality is required",
+  }),
+  spouse_name: z.string().optional(),
+  patient_id_provided: z.string(),
 })
 
 interface PatientAddFormModalProps {
@@ -75,21 +74,28 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      patient_first_name: "",
-      patient_last_name: "",
-      patient_date_of_birth: "",
-      patient_address: "",
-      patient_phone_number: "",
-      patient_email: "",
-      patient_emergency_contact_name: "",
-      patient_emergency_contact_phone: "",
-      patient_bloodtype: undefined,
-      patient_medical_history: "",
-      patient_status: "active",
+      last_name: "",
+      first_name: "",
+      middle_initial: "",
+      date_of_birth: "",
+      sex: "",
+      permanent_address: "",
+      contact_number: "",
+      civil_status: "Single",
+      religion: "",
+      birthplace: "",
+      nationality: "",
+      spouse_name: "",
+      patient_id_provided: "",
     },
   })
 
-  // Auto-refresh after successful submission
+  useEffect(() => {
+    if (isOpen) {
+      form.setValue("patient_id_provided", generatePatientId())
+    }
+  }, [isOpen, form])
+
   useEffect(() => {
     if (isSubmitted) {
       const timer = setTimeout(() => {
@@ -107,305 +113,242 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true)
-      const { data: supabaseData, error } = await supabase.from("patient_basic_info").insert([
+      const { data: supabaseData, error } = await supabase.from("Patients").insert([
         {
-          patient_first_name: values.patient_first_name,
-          patient_last_name: values.patient_last_name,
-          patient_date_of_birth: values.patient_date_of_birth,
-          patient_address: values.patient_address,
-          patient_phone_number: values.patient_phone_number,
-          patient_email: values.patient_email,
-          patient_emergency_contact_name: values.patient_emergency_contact_name,
-          patient_emergency_contact_phone: values.patient_emergency_contact_phone,
-          patient_bloodtype: values.patient_bloodtype,
-          patient_medical_history: values.patient_medical_history,
-          patient_status: values.patient_status,
+          ...values,
         },
       ])
       if (error) {
         console.error("Error inserting data:", error.message)
+        alert("Failed to submit the form. Please try again.")
       } else {
         console.log("Data inserted successfully:", supabaseData)
         setIsSubmitted(true)
-        // Call the callback immediately to refresh the patient list
         if (onPatientAdded) {
           onPatientAdded()
         }
       }
     } catch (error) {
       console.error("Unexpected error:", error)
+      alert("An unexpected error occurred. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
   }
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild onClick={() => setIsOpen(true)}>
-        {trigger}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-xl max-h-1xl overflow-hidden flex flex-col">
-        <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="text-xl font-bold">Add Patient</DialogTitle>
-          <DialogDescription className="text-sm mt-1">
-            Please fill in the form below to add a new patient to the hospital database.
-          </DialogDescription>
-        </DialogHeader>
 
-        <ScrollArea className="w-full h-[400px] p-5">
-          {isSubmitted ? (
-            <div className="flex flex-col items-center justify-center py-10 space-y-4">
-              <CheckCircle2 className="w-16 h-16 text-green-500" />
-              <h2 className="text-2xl font-bold text-center">Patient Added Successfully</h2>
-              <p className="text-center">
-                The patient information has been successfully added to the database.
-              </p>
-            </div>
-          ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setIsOpen(false)
+      form.reset()
+    }
+  }
+
+  return (
+    <div>
+      <div onClick={() => setIsOpen(true)}>{trigger}</div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Add New Patient</DialogTitle>
+            <DialogDescription>Fill out the form below to add a new patient to the system.</DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="h-[70vh] pr-4">
+            {isSubmitted ? (
+              <Alert className="bg-green-50 border-green-200 my-4">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <AlertDescription className="text-green-800 font-medium">Patient added successfully!</AlertDescription>
+              </Alert>
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
-                      control={form.control}
-                      name="patient_first_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="">First Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Jane"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-400" />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="patient_last_name"
+                      name="last_name"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                            <Input
-                              placeholder="Dela Cruz"
-                              {...field}
-                            />
-                            </FormControl>
-                          <FormMessage className="text-red-400" />
+                          <FormControl>
+                            <Input placeholder="Last Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="First Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="middle_initial"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Middle Initial</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Middle Initial" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="date_of_birth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date of Birth</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="sex"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sex</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Sex" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Male">Male</SelectItem>
+                                <SelectItem value="Female">Female</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="contact_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contact Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Contact Number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="civil_status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Civil Status</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Civil Status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Single">Single</SelectItem>
+                                <SelectItem value="Married">Married</SelectItem>
+                                <SelectItem value="Divorced">Divorced</SelectItem>
+                                <SelectItem value="Widowed">Widowed</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="religion"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Religion</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Religion" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="birthplace"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Birthplace</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Birthplace" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="nationality"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nationality</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nationality" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="spouse_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Spouse Name (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Spouse Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+
                   <FormField
-                    control={form.control}
-                    name="patient_date_of_birth"
+                    name="permanent_address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
+                        <FormLabel>Permanent Address</FormLabel>
                         <FormControl>
-                          <Input
-                            type="date"
-                            {...field}
-                          />
+                          <Textarea placeholder="Permanent Address" {...field} />
                         </FormControl>
-                        <FormMessage className="text-red-400" />
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium border-b pb-2">Contact Information</h3>
-                  <FormField
-                    control={form.control}
-                    name="patient_address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Baybay City, Leyte"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="patient_phone_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="09123456789"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-400" />
-                        </FormItem>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting
+                        </>
+                      ) : (
+                        "Submit"
                       )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="patient_email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="example@example.com"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-400" />
-                        </FormItem>
-                      )}
-                    />
+                    </Button>
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium border-b pb-2">Emergency Contact</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="patient_emergency_contact_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Emergency Contact Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Juan Dela Cruz"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-400" />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="patient_emergency_contact_phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Emergency Contact Phone</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="0987654321"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-400" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium border-b pb-2">Medical Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="patient_bloodtype"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Blood Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Blood Type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="A+">A+</SelectItem>
-                            <SelectItem value="A-">A-</SelectItem>
-                            <SelectItem value="B+">B+</SelectItem>
-                            <SelectItem value="B-">B-</SelectItem>
-                            <SelectItem value="AB+">AB+</SelectItem>
-                            <SelectItem value="AB-">AB-</SelectItem>
-                            <SelectItem value="O+">O+</SelectItem>
-                            <SelectItem value="O-">O-</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
-                    )}
-                  />
-                                   <FormField
-                    control={form.control}
-                    name="patient_status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Status"/>
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
-                    )}
-                  />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="patient_medical_history"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Medical History</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Any relevant medical history"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-400" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </form>
-            </Form>
-          )}
-        </ScrollArea>
-
-        <DialogFooter className="flex justify-end pt-4 mt-4 border-t ">
-          <Button
-            className="font-semibold py-2 px-4 w-full rounded-md border"
-            onClick={() =>
-              form.handleSubmit(async (values) => {
-                await handleSubmit(values)
-              })()
-            }
-            type="submit"
-            disabled={!form.formState.isDirty || isSubmitting || isSubmitted}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              "Submit Patient Information"
+                </form>
+              </Form>
             )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
-

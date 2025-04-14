@@ -23,19 +23,20 @@ export const metadata: Metadata = {
   
 };
 
-export default function DashboardLayout({
+export default function PatientsLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) 
+{
   return (
     <div
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <SidebarProvider defaultOpen={false}>
+            <SidebarProvider defaultOpen={false}>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border m-2 rounded-lg bg-sidebar shadow-2xs transition-[width,height] ease-linear sticky top-0 z-50">
+        <header className="flex h-16 shrink-0 items-center gap-2 border m-2 rounded-lg bg-sidebar shadow-2xs transition-[width,height] ease-linear sticky top-0 z-50">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator

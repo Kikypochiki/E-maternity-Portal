@@ -1,4 +1,5 @@
 "use client"
+
 import React from "react"
 import { createClient } from "@/lib/supabase/client"
 import NavUser from "../nav-user"
@@ -46,7 +47,7 @@ export function HeaderProfile() {
       }, [])
 
   return (
-    <div className="flex m-4 items-center w-full">
+    <div className="flex m-1 items-center w-full">
       <NavUser profile={userProfile} />
     </div>
   )

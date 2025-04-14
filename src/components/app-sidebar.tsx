@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, LayoutDashboard, Inbox, User, Settings, Stethoscope, CircleHelp} from "lucide-react"
+import { Bell, LayoutDashboard, Inbox, User, Settings, Stethoscope, CircleHelp, Users} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import {
@@ -16,13 +16,13 @@ import Image from "next/image";
 const data = [
   {
     title: "Dashboard",
-    url: "admin/dashbaord",
+    url: "/admin/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: "On-call",
-    url: "#",
-    icon: Stethoscope,
+    title: "Patients",
+    url: "/admin/patients",
+    icon: Users,
   },
   {
     title: "Notifications",
@@ -70,7 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent className="bg-sidebar">
-        <NavMain items={data} />
+        <NavMain items={data}/>
       </SidebarContent>
       <SidebarFooter className="">
         <div className="flex items-center gap-2 mb-4 ml-2 mr-2">
