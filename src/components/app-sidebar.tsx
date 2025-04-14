@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, LayoutDashboard, Inbox, User, Settings, Stethoscope, CircleHelp, Users} from "lucide-react"
+import { Bell, LayoutDashboard, Inbox, User, Settings, CircleHelp, Users} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import {
