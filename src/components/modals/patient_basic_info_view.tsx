@@ -164,6 +164,14 @@ return (
                                     icon={<BookOpen className="h-4 w-4 text-primary" />}
                                 />
                             )}
+
+                            {patient.spouse_name && (
+                                <InfoItem
+                                    label="Spouse Name"
+                                    value={patient.spouse_name}
+                                    icon={<Users className="h-4 w-4 text-primary" />}
+                                />
+                            )}
                         </CardContent>
                     </MotionCard>
 
