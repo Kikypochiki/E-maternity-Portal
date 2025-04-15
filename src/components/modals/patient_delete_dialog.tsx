@@ -30,7 +30,7 @@ export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted }
     try {
       setIsDeleting(true)
 
-      const { error } = await supabase.from("patient_basic_info").delete().eq("patient_id", patientId)
+      const { error } = await supabase.from("Patients").delete().eq("patient_id", patientId)
 
       if (error) {
         console.error("Error deleting patient:", error.message)
@@ -54,11 +54,15 @@ export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted }
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setIsOpen(true)} className="bg-red-600 hover:bg-red-700">
-        <Trash2 className="h-4 w-4 mr-1" />
-        Delete
-      </Button>
-
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-red-600"
+          onClick={() => setIsOpen(true)}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete Patient
+        </Button>
+        
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

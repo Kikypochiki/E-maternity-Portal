@@ -41,10 +41,19 @@ export default function Patients() {
       if (patients) {
         const formattedData = patients.map((patient) => ({
           ...patient,
+          patient_id: patient.patient_id || "N/A",
           patient_id_provided: patient.patient_id_provided || "N/A",
           first_name: patient.first_name || "N/A",
           last_name: patient.last_name || "N/A",
+          middle_initial: patient.middle_initial || "N/A",
+          date_of_birth: patient.date_of_birth || "N/A",
+          permanent_address: patient.permanent_address || "N/A",
           contact_number: patient.contact_number || "N/A",
+          civil_status: patient.civil_status || "N/A",
+          religion: patient.religion || "N/A",
+          birthplace: patient.birthplace || "N/A",
+          nationality: patient.nationality || "N/A",
+          spouse_name: patient.spouse_name || "N/A",
         }))
         setData(formattedData)
       }
