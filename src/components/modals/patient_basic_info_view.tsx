@@ -236,19 +236,47 @@ export function PatientBasicInfoView({
                 <SheetHeader className="space-y-2">
                     <div className="flex items-center justify-between">
                         <SheetTitle className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
-                                <User className="w-5 h-5" />
-                            </div>
-                            Patient Profile
-                        </SheetTitle>
-                        <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-primary/5 text-primary border-primary/20">
-                            ID: {formData.patient_id_provided}
-                        </Badge>
+                        <motion.div 
+                                className="mb-6"
+                                variants={slideUp}
+                            >
+                                <Card className="overflow-hidden border-none shadow-md bg-gradient-to-r from-primary/10 to-primary/5">
+                                    <CardContent className="p-4">
+                                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 text-primary">
+                                                <User className="w-8 h-8" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="text-xl font-bold text-slate-800">
+                                                    {formData.first_name} {formData.middle_initial ? `${formData.middle_initial}. ` : ''}{formData.last_name}
+                                                </h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {formData.civil_status && (
+                                                        <Badge variant="outline" className={cn("px-2 py-1 text-xs font-medium", getStatusColor(formData.civil_status))}>
+                                                            {formData.civil_status}
+                                                        </Badge>
+                                                    )}
+                                                    {formData.date_of_birth && (
+                                                        <Badge variant="outline" className="px-2 py-1 text-xs font-medium bg-violet-50 text-violet-700 border-violet-200">
+                                                            Age: {calculateAge(formData.date_of_birth)}
+                                                        </Badge>
+                                                    )}
+                                                    {formData.nationality && (
+                                                        <Badge variant="outline" className="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200">
+                                                            {formData.nationality}
+                                                        </Badge>
+                                                    )}
+                                                    <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-primary/5 text-primary border-primary/20">
+                                                        ID: {formData.patient_id_provided}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        </SheetTitle>   
                     </div>
-                    <SheetDescription className="text-sm text-slate-500">
-                        View and manage patient&#39;s personal information
-                    </SheetDescription>
-                    <Separator className="my-2" />
                 </SheetHeader>
 
                 <AnimatePresence mode="wait">
@@ -451,42 +479,6 @@ export function PatientBasicInfoView({
                             variants={fadeIn}
                             className="py-4"
                         >
-                            <motion.div 
-                                className="mb-6"
-                                variants={slideUp}
-                            >
-                                <Card className="overflow-hidden border-none shadow-md bg-gradient-to-r from-primary/10 to-primary/5">
-                                    <CardContent className="p-4">
-                                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 text-primary">
-                                                <User className="w-8 h-8" />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <h3 className="text-xl font-bold text-slate-800">
-                                                    {formData.first_name} {formData.middle_initial ? `${formData.middle_initial}. ` : ''}{formData.last_name}
-                                                </h3>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {formData.civil_status && (
-                                                        <Badge variant="outline" className={cn("px-2 py-1 text-xs font-medium", getStatusColor(formData.civil_status))}>
-                                                            {formData.civil_status}
-                                                        </Badge>
-                                                    )}
-                                                    {formData.date_of_birth && (
-                                                        <Badge variant="outline" className="px-2 py-1 text-xs font-medium bg-violet-50 text-violet-700 border-violet-200">
-                                                            Age: {calculateAge(formData.date_of_birth)}
-                                                        </Badge>
-                                                    )}
-                                                    {formData.nationality && (
-                                                        <Badge variant="outline" className="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200">
-                                                            {formData.nationality}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
 
                             <div className="space-y-6">
                                 <motion.div 
