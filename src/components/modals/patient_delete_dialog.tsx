@@ -22,7 +22,7 @@ interface PatientDeleteDialogProps {
   onPatientDeleted?: () => void
 }
 
-export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted }: PatientDeleteDialogProps) {
+export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted}: PatientDeleteDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -56,11 +56,13 @@ export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted }
     <>
         <Button
           variant="ghost"
-          className="w-full justify-start text-red-600"
+          className="hover:relative group"  
           onClick={() => setIsOpen(true)}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete Patient
+          <Trash2 className="h-4 w-4" />
+          <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                  Delete Patient
+                </span>
         </Button>
         
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>

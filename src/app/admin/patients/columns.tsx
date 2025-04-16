@@ -5,7 +5,7 @@ import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { PatientDeleteDialog } from "@/components/modals/patient_delete_dialog"
-import PatientBasicInfoView from "@/components/modals/patient_basic_info_view"
+import { PatientBasicInfoView } from "@/components/modals/patient_basic_info_view"
 import {Eye} from "lucide-react"
 
 import {
@@ -72,46 +72,29 @@ export const columns: ColumnDef<Patient>[] = [
     },
     {
       id: "actions",
-      header: "Actions",
       cell: ({ row }) => {
         const patient = row.original
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(patient.patient_id)}
-              >
-              Copy Patient Account ID
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <PatientBasicInfoView 
+            <div className="flex space-x-2">
+            <PatientBasicInfoView
               trigger={
-               <Button
-               variant="ghost" className="w-full justify-start">
-                <Eye className="mr-2 h-4 w-4" />
-                View Patient</Button>
+                <Button variant="ghost" className="hover:relative group">
+                <Eye className="h-4 w-4" />
+                <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                  View Patient
+                </span>
+                </Button>
               }
               patient={patient}
-              onFetchData={() => {
-                console.log("Fetching patient data...");
-              }}/>
-              <DropdownMenuItem>Edit Patient</DropdownMenuItem>
-                <PatientDeleteDialog 
-              patientId={patient.patient_id} 
+            />
+            <PatientDeleteDialog
+              patientId={patient.patient_id}
               patientName={`${patient.first_name} ${patient.last_name}`}
               onPatientDeleted={() => {
-                window.location.reload();
+              window.location.reload();
               }}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
+            />
+            </div>
         )
       },
     },
