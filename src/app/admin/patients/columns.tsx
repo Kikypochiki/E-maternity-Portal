@@ -3,7 +3,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
 import { PatientDeleteDialog } from "@/components/modals/patient_delete_dialog"
 import { PatientBasicInfoView } from "@/components/modals/patient_basic_info_view"
 import {Eye} from "lucide-react"

@@ -25,7 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Phone, Calendar, MapPin, Edit, Save, X, Heart, Globe, Home, BookOpen, Users, AlertCircle } from 'lucide-react';
+import { User, Phone, Calendar, MapPin, Edit, Save, X, Heart, Globe, Home, BookOpen, Users} from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 interface Patient {
