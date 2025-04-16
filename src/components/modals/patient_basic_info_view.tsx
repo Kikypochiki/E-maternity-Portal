@@ -246,7 +246,7 @@ export function PatientBasicInfoView({
                         </Badge>
                     </div>
                     <SheetDescription className="text-sm text-slate-500">
-                        View and manage patient's personal information
+                        View and manage patient&#39;s personal information
                     </SheetDescription>
                     <Separator className="my-2" />
                 </SheetHeader>

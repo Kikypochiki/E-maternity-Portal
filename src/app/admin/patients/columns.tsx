@@ -7,14 +7,6 @@ import { PatientDeleteDialog } from "@/components/modals/patient_delete_dialog"
 import { PatientBasicInfoView } from "@/components/modals/patient_basic_info_view"
 import {Eye} from "lucide-react"
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import Patient from "@/app/patient/page"
 
 export type Patient = {
