@@ -11,10 +11,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
-import { Loader2, Trash2 } from "lucide-react"
+import { Loader2} from "lucide-react"
 
 interface PatientDeleteDialogProps {
   patientId: string
