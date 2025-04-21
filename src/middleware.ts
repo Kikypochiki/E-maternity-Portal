@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
       } else if (userRole.role === "admin") {
         if (
           request.nextUrl.pathname.startsWith("/admin/dashboard") ||
-          request.nextUrl.pathname.startsWith("/admin/patients")
+          request.nextUrl.pathname.startsWith("/admin/patients") || request.nextUrl.pathname.startsWith("/admin/admissions")
         ) {
           // Allow access to admin routes
           return res
@@ -75,6 +75,7 @@ export const config = {
     "/patient/:path*",
     "/admin/dashboard/:path*",
     "/admin/patients/:path*",
+    "/admin/admissions/:path*",
     // Add this to ensure auth is checked on all routes
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],

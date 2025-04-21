@@ -40,6 +40,8 @@ interface Patient {
     birthplace?: string;
     nationality?: string;
     spouse_name?: string;
+    gravidity?: number;
+    parity?: number;
 }
 
 interface PatientBasicInfoViewProps {
@@ -71,6 +73,8 @@ export function PatientBasicInfoView({
         birthplace: patient?.birthplace || "",
         nationality: patient?.nationality || "",
         spouse_name: patient?.spouse_name || "",
+        gravidity: patient?.gravidity || 0,
+        parity: patient?.parity || 0,
     });
 
     useEffect(() => {
@@ -89,6 +93,8 @@ export function PatientBasicInfoView({
                 birthplace: patient.birthplace || "",
                 nationality: patient.nationality || "",
                 spouse_name: patient.spouse_name || "",
+                gravidity: patient.gravidity || 0,
+                parity: patient.parity || 0,
             });
         }
     }, [patient]);
@@ -149,6 +155,9 @@ export function PatientBasicInfoView({
                     birthplace: formData.birthplace,
                     nationality: formData.nationality,
                     spouse_name: formData.spouse_name,
+                    gravidity: Number(formData.gravidity),
+                    parity: Number(formData.parity),
+                    
                 })
                 .eq("patient_id", patient.patient_id)
                 .select();
@@ -184,6 +193,8 @@ export function PatientBasicInfoView({
                 birthplace: patient.birthplace || "",
                 nationality: patient.nationality || "",
                 spouse_name: patient.spouse_name || "",
+                gravidity: patient.gravidity || 0,
+                parity: patient.parity || 0,
             });
         }
         setIsEditing(false);
@@ -241,7 +252,7 @@ export function PatientBasicInfoView({
                                 <Card className="overflow-hidden border-none shadow-md bg-gradient-to-r from-primary/10 to-primary/5">
                                     <CardContent className="p-4">
                                         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 text-primary">
+                                            <div className="flex items-center justify-center w-16 h-16 rounded-full text-primary">
                                                 <User className="w-8 h-8" />
                                             </div>
                                             <div className="space-y-1">
@@ -267,6 +278,16 @@ export function PatientBasicInfoView({
                                                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-primary/5 text-primary border-primary/20">
                                                         ID: {formData.patient_id_provided}
                                                     </Badge>
+                                                    {formData.gravidity !== undefined && (
+                                                        <Badge variant="outline" className="px-2 py-1 text-xs font-medium bg-green-50 text-green-700 border-green-200">
+                                                            Gravidity: {formData.gravidity}
+                                                        </Badge>
+                                                    )}
+                                                    {formData.parity !== undefined && (
+                                                        <Badge variant="outline" className="px-2 py-1 text-xs font-medium bg-yellow-50 text-yellow-700 border-yellow-200">
+                                                            Parity: {formData.parity}
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -368,6 +389,36 @@ export function PatientBasicInfoView({
                                         </Select>
                                     </div>
                                 </motion.div>
+                                <motion.div 
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                    variants={slideUp}
+                                >
+                                    {/* Other fields */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="gravidity" className="text-slate-700">Gravidity</Label>
+                                        <Input
+                                            id="gravidity"
+                                            name="gravidity"
+                                            type="number"
+                                            value={formData.gravidity?.toString() || ""}
+                                            onChange={handleChange}
+                                            className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="parity" className="text-slate-700">Parity</Label>
+                                        <Input
+                                            id="parity"
+                                            name="parity"
+                                            type="number"
+                                            value={formData.parity?.toString() || ""}
+                                            onChange={handleChange}
+                                            className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+                                        />
+                                    </div>
+                                </motion.div>
+
 
                                 <motion.div 
                                     className="space-y-2"
@@ -504,6 +555,25 @@ export function PatientBasicInfoView({
                                             icon={<Heart className="text-primary" />}
                                             label="Spouse Name"
                                             value={formData.spouse_name || "N/A"}
+                                        />
+                                    </div>
+                                </motion.div>
+
+                                <motion.div 
+                                    className="space-y-4"
+                                    variants={slideUp}
+                                >
+                                    <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Medical Information</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <InfoItem 
+                                            icon={<Users className="text-primary" />}
+                                            label="Gravidity"
+                                            value={formData.gravidity?.toString() || "N/A"}
+                                        />
+                                        <InfoItem 
+                                            icon={<Users className="text-primary" />}
+                                            label="Parity"
+                                            value={formData.parity?.toString() || "N/A"}
                                         />
                                     </div>
                                 </motion.div>

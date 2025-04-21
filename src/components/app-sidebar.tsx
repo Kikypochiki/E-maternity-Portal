@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, LayoutDashboard, Inbox, User, Settings, CircleHelp, Users} from "lucide-react"
+import { Bell, LayoutDashboard, Inbox, User, Settings, CircleHelp, Users, Hospital} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import {
@@ -23,6 +23,11 @@ const data = [
     title: "Patients",
     url: "/admin/patients",
     icon: Users,
+  },
+  {
+    title: "Admissions",
+    url: "/admin/admissions",
+    icon: Hospital,
   },
   {
     title: "Notifications",

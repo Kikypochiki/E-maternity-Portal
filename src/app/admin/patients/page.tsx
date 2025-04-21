@@ -1,19 +1,22 @@
 "use client"
-import { Plus } from "lucide-react"
+import { Plus, Grid, List } from "lucide-react"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
+import { Toggle } from "@/components/ui/toggle"
 import { PatientAddForm } from "@/components/modals/patient_add_form."
 import { useRouter } from "next/navigation"
 import { DataTable } from "./data-table"
 import { type Patient, columns } from "./columns"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PatientGridView } from "@/components/modals/patient_grid_view"
 
 export default function Patients() {
   const router = useRouter()
   const supabase = createClient()
   const [data, setData] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
+  const [viewType, setViewType] = useState<"table" | "grid">("table")
 
   const fetchData = async () => {
     try {
@@ -54,6 +57,8 @@ export default function Patients() {
           birthplace: patient.birthplace || "N/A",
           nationality: patient.nationality || "N/A",
           spouse_name: patient.spouse_name || "N/A",
+          gravidty: patient.gravidty || "N/A",
+          parity: patient.parity || "N/A",
         }))
         setData(formattedData)
       }
@@ -98,22 +103,42 @@ export default function Patients() {
           {loading ? (
             <Skeleton className="w-[100px] h-[20px] rounded-full" />
           ) : (
-            <h1 className="sm:text-2xl text-xl m-2">Patients</h1>
+            <h1 className="text-2xl font-bold">Patients</h1>
           )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           {loading ? (
             <Skeleton className="w-[120px] h-[40px] rounded-md" />
           ) : (
-            <PatientAddForm
-              trigger={
-                <Button>
-                  Add Patient
-                  <Plus className="ml-2" size={16} />
-                </Button>
-              }
-              onPatientAdded={fetchData}
-            />
+            <>
+              <div className="flex items-center space-x-2 border rounded-md p-1">
+                <Toggle
+                  pressed={viewType === "table"}
+                  onPressedChange={() => setViewType("table")}
+                  aria-label="Toggle table view"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-white"
+                >
+                  <List className="h-4 w-4" />
+                </Toggle>
+                <Toggle
+                  pressed={viewType === "grid"}
+                  onPressedChange={() => setViewType("grid")}
+                  aria-label="Toggle grid view"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-white"
+                >
+                  <Grid className="h-4 w-4" />
+                </Toggle>
+              </div>
+              <PatientAddForm
+                trigger={
+                  <Button>
+                    Add Patient
+                    <Plus className="ml-2" size={16} />
+                  </Button>
+                }
+                onPatientAdded={fetchData}
+              />
+            </>
           )}
         </div>
       </div>
@@ -124,8 +149,10 @@ export default function Patients() {
             <Skeleton className="w-full h-10 rounded-md" />
             <Skeleton className="w-full h-10 rounded-md" />
           </div>
-        ) : (
+        ) : viewType === "table" ? (
           <DataTable columns={columns} data={data} />
+        ) : (
+          <PatientGridView data={data} onPatientDeleted={fetchData} />
         )}
       </div>
     </div>

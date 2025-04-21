@@ -20,9 +20,10 @@ interface PatientDeleteDialogProps {
   patientId: string
   patientName: string
   onPatientDeleted?: () => void
+  trigger: React.ReactNode
 }
 
-export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted}: PatientDeleteDialogProps) {
+export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted, trigger}: PatientDeleteDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -54,16 +55,9 @@ export function PatientDeleteDialog({ patientId, patientName, onPatientDeleted}:
 
   return (
     <>
-        <Button
-          variant="ghost"
-          className="hover:relative group"  
-          onClick={() => setIsOpen(true)}
-        >
-          <Trash2 className="h-4 w-4" />
-          <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
-                  Delete Patient
-                </span>
-        </Button>
+          <div onClick={() => setIsOpen(true)}>
+            {trigger}
+          </div>
         
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
         <AlertDialogContent>
