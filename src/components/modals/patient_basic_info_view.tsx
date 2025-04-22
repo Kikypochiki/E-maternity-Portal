@@ -42,6 +42,7 @@ interface Patient {
     spouse_name?: string;
     gravidity?: number;
     parity?: number;
+    occupation?: string;
 }
 
 interface PatientBasicInfoViewProps {
@@ -75,6 +76,7 @@ export function PatientBasicInfoView({
         spouse_name: patient?.spouse_name || "",
         gravidity: patient?.gravidity || 0,
         parity: patient?.parity || 0,
+        occupation: patient?.occupation || "",
     });
 
     useEffect(() => {
@@ -95,6 +97,7 @@ export function PatientBasicInfoView({
                 spouse_name: patient.spouse_name || "",
                 gravidity: patient.gravidity || 0,
                 parity: patient.parity || 0,
+                occupation: patient.occupation || "",
             });
         }
     }, [patient]);
@@ -157,6 +160,7 @@ export function PatientBasicInfoView({
                     spouse_name: formData.spouse_name,
                     gravidity: Number(formData.gravidity),
                     parity: Number(formData.parity),
+                    occupation: formData.occupation,
                     
                 })
                 .eq("patient_id", patient.patient_id)
@@ -195,6 +199,7 @@ export function PatientBasicInfoView({
                 spouse_name: patient.spouse_name || "",
                 gravidity: patient.gravidity || 0,
                 parity: patient.parity || 0,
+                occupation: patient.occupation || "",
             });
         }
         setIsEditing(false);
@@ -393,7 +398,6 @@ export function PatientBasicInfoView({
                                     className="grid grid-cols-1 md:grid-cols-2 gap-6"
                                     variants={slideUp}
                                 >
-                                    {/* Other fields */}
                                     <div className="space-y-2">
                                         <Label htmlFor="gravidity" className="text-slate-700">Gravidity</Label>
                                         <Input
@@ -406,6 +410,7 @@ export function PatientBasicInfoView({
                                         />
                                     </div>
 
+                                    <div className="space-y-2"></div>
                                     <div className="space-y-2">
                                         <Label htmlFor="parity" className="text-slate-700">Parity</Label>
                                         <Input
@@ -449,6 +454,7 @@ export function PatientBasicInfoView({
                                         />
                                     </div>
 
+
                                     <div className="space-y-2">
                                         <Label htmlFor="birthplace" className="text-slate-700">Birthplace</Label>
                                         <Input
@@ -477,6 +483,17 @@ export function PatientBasicInfoView({
                                             id="spouse_name"
                                             name="spouse_name"
                                             value={formData.spouse_name || ""}
+                                            onChange={handleChange}
+                                            className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="occupation" className="text-slate-700">Occupation</Label>
+                                        <Input
+                                            id="occupation"
+                                            name="occupation"
+                                            value={formData.occupation || ""}
                                             onChange={handleChange}
                                             className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
                                         />
@@ -604,6 +621,11 @@ export function PatientBasicInfoView({
                                                 icon={<BookOpen className="text-primary" />}
                                                 label="Religion"
                                                 value={formData.religion || "N/A"}
+                                            />
+                                            <InfoItem 
+                                                icon={<User className="text-primary" />}
+                                                label="Occupation"
+                                                value={formData.occupation || "N/A"}
                                             />
                                         </div>
                                     </div>

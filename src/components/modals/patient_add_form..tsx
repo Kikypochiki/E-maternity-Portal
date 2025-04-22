@@ -60,6 +60,13 @@ const formSchema = z.object({
   }),
   spouse_name: z.string().optional(),
   patient_id_provided: z.string(),
+  occupation: z.string().optional(),
+  gravidity: z.number()
+    .refine((val) => val >= 0, {
+      message: "Gravidity must be a positive number.",}),
+  parity: z.number()
+    .refine((val) => val >= 0, {
+      message: "Parity must be a positive number.",}),
 })
 
 interface PatientAddFormModalProps {
@@ -88,6 +95,9 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
       nationality: "",
       spouse_name: "",
       patient_id_provided: "",
+      occupation: "",
+      gravidity: 0,
+      parity: 0,
     },
   })
 
@@ -148,307 +158,362 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
     <div>
       <div onClick={() => setIsOpen(true)}>{trigger}</div>
       <AnimatePresence>
-        {isOpen && (
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden p-0">
+      {isOpen && (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0">
+          <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="bg-gradient-to-b from-background to-muted/30 p-6 rounded-lg"
+          >
+          <DialogHeader className="mb-4">
+            <motion.div
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            >
+            <DialogTitle className="text-2xl font-bold text-primary">Add New Patient</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Fill out the form below to add a new patient to the system.
+            </DialogDescription>
+            </motion.div>
+          </DialogHeader>
+
+          <ScrollArea className="h-[70vh] pr-4">
+            {isSubmitted ? (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 100 }}
+            >
+              <Alert className="bg-green-50 border-green-200 my-4 shadow-sm">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+              >
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </motion.div>
+              <AlertDescription className="text-green-800 font-medium ml-2">
+                Patient added successfully!
+              </AlertDescription>
+              </Alert>
+            </motion.div>
+            ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="bg-gradient-to-b from-background to-muted/30 p-6 rounded-lg"
+                transition={{ duration: 0.5 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <DialogHeader className="mb-4">
-                  <motion.div
-                    initial={{ y: -10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <DialogTitle className="text-2xl font-bold text-primary">Add New Patient</DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
-                      Fill out the form below to add a new patient to the system.
-                    </DialogDescription>
-                  </motion.div>
-                </DialogHeader>
-
-                <ScrollArea className="h-[70vh] pr-4">
-                  {isSubmitted ? (
-                    <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 100 }}
+                <FormField
+                name="first_name"
+                render={({ field }) => (
+                <FormItem className="transition-all duration-200">
+                <FormLabel className="font-medium text-foreground/80">First Name</FormLabel>
+                <FormControl>
+                  <Input
+                  placeholder="First Name"
+                  {...field}
+                  className="border-input/50 focus:border-primary transition-all duration-200"
+                  />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+                )}
+                />
+                <FormField
+                name="last_name"
+                render={({ field }) => (
+                <FormItem className="transition-all duration-200">
+                <FormLabel className="font-medium text-foreground/80">Last Name</FormLabel>
+                <FormControl>
+                  <Input
+                  placeholder="Last Name"
+                  {...field}
+                  className="border-input/50 focus:border-primary transition-all duration-200"
+                  />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+                )}
+                />
+                <FormField
+                name="middle_initial"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Middle Initial</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Middle Initial"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="date_of_birth"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Date of Birth</FormLabel>
+                  <FormControl>
+                    <Input
+                    type="date"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="sex"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Sex</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) => field.onChange(value)}
+                      value={field.value || ""}
                     >
-                      <Alert className="bg-green-50 border-green-200 my-4 shadow-sm">
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.2, type: "spring" }}
-                        >
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        </motion.div>
-                        <AlertDescription className="text-green-800 font-medium ml-2">
-                          Patient added successfully!
-                        </AlertDescription>
-                      </Alert>
-                    </motion.div>
-                  ) : (
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5 }}
-                          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                        >
-                          <FormField
-                          name="first_name"
-                          render={({ field }) => (
-                            <FormItem className="transition-all duration-200">
-                            <FormLabel className="font-medium text-foreground/80">First Name</FormLabel>
-                            <FormControl>
-                              <Input
-                              placeholder="First Name"
-                              {...field}
-                              className="border-input/50 focus:border-primary transition-all duration-200"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                          )}
-                          />
-                          <FormField
-                          name="last_name"
-                          render={({ field }) => (
-                            <FormItem className="transition-all duration-200">
-                            <FormLabel className="font-medium text-foreground/80">Last Name</FormLabel>
-                            <FormControl>
-                              <Input
-                              placeholder="Last Name"
-                              {...field}
-                              className="border-input/50 focus:border-primary transition-all duration-200"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                          )}
-                          />
-                          <FormField
-                          name="middle_initial"
-                          render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Middle Initial</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Middle Initial"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="date_of_birth"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Date of Birth</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="date"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="sex"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Sex</FormLabel>
-                                <FormControl>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger className="border-input/50 focus:border-primary transition-all duration-200">
-                                      <SelectValue placeholder="Select Sex" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Male">Male</SelectItem>
-                                      <SelectItem value="Female">Female</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="contact_number"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Contact Number</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Contact Number"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="civil_status"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Civil Status</FormLabel>
-                                <FormControl>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger className="border-input/50 focus:border-primary transition-all duration-200">
-                                      <SelectValue placeholder="Select Civil Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Single">Single</SelectItem>
-                                      <SelectItem value="Married">Married</SelectItem>
-                                      <SelectItem value="Divorced">Divorced</SelectItem>
-                                      <SelectItem value="Widowed">Widowed</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="religion"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Religion</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Religion"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="birthplace"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Birthplace</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Birthplace"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="nationality"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Nationality</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Nationality"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="spouse_name"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Spouse Name (Optional)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Spouse Name"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </motion.div>
-
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                        >
-                          <FormField
-                            name="permanent_address"
-                            render={({ field }) => (
-                              <FormItem className="transition-all duration-200">
-                                <FormLabel className="font-medium text-foreground/80">Permanent Address</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="Permanent Address"
-                                    {...field}
-                                    className="border-input/50 focus:border-primary transition-all duration-200 min-h-[100px]"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </motion.div>
-
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.3 }}
-                          className="flex justify-end gap-2 pt-4"
-                        >
-                          <Button
-                            variant="outline"
-                            onClick={handleClose}
-                            disabled={isSubmitting}
-                            className="transition-all duration-200 hover:bg-muted"
-                          >
-                            Cancel
-                          </Button>
-                          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button
-                              type="submit"
-                              disabled={isSubmitting}
-                              className="bg-primary hover:bg-primary/90 transition-all duration-200"
-                            >
-                              {isSubmitting ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Submitting
-                                </>
-                              ) : (
-                                "Submit"
-                              )}
-                            </Button>
-                          </motion.div>
-                        </motion.div>
-                      </form>
-                    </Form>
-                  )}
-                </ScrollArea>
+                    <SelectTrigger className="border-input/50 focus:border-primary transition-all duration-200">
+                      <SelectValue placeholder="Select Sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                    </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="contact_number"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Contact Number</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Contact Number"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="civil_status"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Civil Status</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="border-input/50 focus:border-primary transition-all duration-200">
+                      <SelectValue placeholder="Select Civil Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Single">Single</SelectItem>
+                      <SelectItem value="Married">Married</SelectItem>
+                      <SelectItem value="Divorced">Divorced</SelectItem>
+                      <SelectItem value="Widowed">Widowed</SelectItem>
+                    </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="religion"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Religion</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Religion"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="birthplace"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Birthplace</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Birthplace"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="nationality"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Nationality</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Nationality"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="spouse_name"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Spouse Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Spouse Name"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="occupation"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Occupation</FormLabel>
+                  <FormControl>
+                    <Input
+                    placeholder="Occupation"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="gravidity"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Gravidity</FormLabel>
+                  <FormControl>
+                    <Input
+                    type="number"
+                    placeholder="Gravidity"
+                    value={field.value || ""}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+                <FormField
+                name="parity"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Parity</FormLabel>
+                  <FormControl>
+                    <Input
+                    type="number"
+                    placeholder="Parity"
+                    value={field.value || ""}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    className="border-input/50 focus:border-primary transition-all duration-200"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
               </motion.div>
-            </DialogContent>
-          </Dialog>
-        )}
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <FormField
+                name="permanent_address"
+                render={({ field }) => (
+                  <FormItem className="transition-all duration-200">
+                  <FormLabel className="font-medium text-foreground/80">Permanent Address</FormLabel>
+                  <FormControl>
+                    <Textarea
+                    placeholder="Permanent Address"
+                    {...field}
+                    className="border-input/50 focus:border-primary transition-all duration-200 min-h-[100px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+                )}
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex justify-end gap-2 pt-4"
+              >
+                <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="transition-all duration-200 hover:bg-muted"
+                >
+                Cancel
+                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-primary hover:bg-primary/90 transition-all duration-200"
+                >
+                  {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting
+                  </>
+                  ) : (
+                  "Submit"
+                  )}
+                </Button>
+                </motion.div>
+              </motion.div>
+              </form>
+            </Form>
+            )}
+          </ScrollArea>
+          </motion.div>
+        </DialogContent>
+        </Dialog>
+      )}
       </AnimatePresence>
     </div>
   )
