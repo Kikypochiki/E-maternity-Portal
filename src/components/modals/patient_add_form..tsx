@@ -489,7 +489,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 >
                 Cancel
                 </Button>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
@@ -505,7 +504,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                   )}
                 </Button>
                 </motion.div>
-              </motion.div>
               </form>
             </Form>
             )}
