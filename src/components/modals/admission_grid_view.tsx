@@ -123,7 +123,7 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
                         trigger={
                           <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm">
                             <ClipboardList className="h-4 w-4 mr-2 text-purple-600" />
-                            Doctor's Orders
+                            Doctor&#39;s Orders
                           </button>
                         }
                         patientId={admission.patient_id}

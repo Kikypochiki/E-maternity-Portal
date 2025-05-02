@@ -488,7 +488,7 @@ export function DoctorsOrdersForm({
                   <Alert className="mb-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Patient Discharged</AlertTitle>
-                    <AlertDescription>This patient has been discharged. Orders can't be viewed</AlertDescription>
+                    <AlertDescription>This patient has been discharged. Orders can&apos;t be viewed</AlertDescription>
                   </Alert>
                 )}
 

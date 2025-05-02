@@ -807,7 +807,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                         <FileText className="h-12 w-12 text-slate-300" />
                         <h3 className="text-lg font-medium text-slate-700">No admission history</h3>
                         <p className="text-sm text-slate-500">
-                          This patient doesn't have any admission history documents yet.
+                          This patient doesn&#39;t have any admission history documents yet.
                         </p>
                       </div>
                     </div>
