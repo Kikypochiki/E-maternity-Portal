@@ -1,12 +1,15 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye, Trash, UserMinus} from "lucide-react"
+import { ArrowUpDown, Eye, Trash, UserMinus, Stethoscope, Pill, ClipboardList} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AdmissionDeleteDialog } from "@/components/modals/admission_delete_dialog"
 import { AdmissionDischargeForm } from "@/components/modals/admission_discharge_form"
 import { AdmissionView } from "@/components/modals/admission_view"
+import { DoctorsOrdersForm } from "@/components/modals/doctors_order_form"
+import { MedicationsForm } from "@/components/modals/medications_form"
+import { NotesAttachmentForm } from "@/components/modals/notes_attachment_form"
 
 // Define the Admission type based on your database schema
 export type Admission = {
@@ -91,56 +94,100 @@ export const columns: ColumnDef<Admission>[] = [
 
       return (
         <div className="flex space-x-2">
-            <div>
-              <AdmissionView 
-                trigger={
-                  <Button variant="ghost" className="hover:relative group">
-                    <Eye className="h-4 w-4 text-green-600" />
-                    <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
-                      View Details
-                    </span>
-                  </Button>
-                }
-                admission={admission}
-                patientId={admission.patient_id}
-              />
+          <div>
+            <AdmissionView
+              trigger={
+                <Button variant="ghost" className="hover:relative group">
+                  <Eye className="h-4 w-4 text-green-600" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                    View Details
+                  </span>
+                </Button>
+              }
+              admission={admission}
+              patientId={admission.patient_id}
+            />
           </div>
-        <div>
-          <AdmissionDeleteDialog
+          <div>
+            <AdmissionDeleteDialog
+              admissionId={admission.admission_id}
+              patientName={`${admission.first_name} ${admission.last_name}`}
+              trigger={
+                <Button variant="ghost" className="hover:relative group">
+                  <Trash className="h-4 w-4 text-red-600" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                    Delete
+                  </span>
+                </Button>
+              }
+              onPatientDeleted={() => {
+                window.location.reload()
+              }}
+            />
+          </div>
+          <div>
+            <AdmissionDischargeForm
+              admissionId={admission.admission_id}
+              patientName={`${admission.first_name} ${admission.last_name}`}
+              trigger={
+                <Button variant="ghost" className="hover:relative group">
+                  <UserMinus className="h-4 w-4 text-purple-600" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                    Discharge
+                  </span>
+                </Button>
+              }
+              onPatientDischarged={() => {
+                window.location.reload()
+              }}
+            />
+          </div>
+          <div>
+            <DoctorsOrdersForm
+              admissionId={admission.admission_id}
+              patientId={admission.patient_id}
+              patientName={`${admission.first_name} ${admission.last_name}`}
+              trigger={
+                <Button variant="ghost" className="hover:relative group">
+                  <Stethoscope className="h-4 w-4 text-purple-600" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                    Doctor&#39;s Order
+                  </span>
+                </Button>
+              }
+            />
+          </div>
+          <div>
+            <MedicationsForm
+              admissionId={admission.admission_id}
+              patientId={admission.patient_id}
+              patientName={`${admission.first_name} ${admission.last_name}`}
+              trigger={
+                <Button variant="ghost" className="hover:relative group">
+                  <Pill className="h-4 w-4 text-purple-600" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                    Medications
+                  </span>
+                </Button>
+              }
+            />
+          </div>
+          <div>
+            <NotesAttachmentForm
             admissionId={admission.admission_id}
+            patientId={admission.patient_id}
             patientName={`${admission.first_name} ${admission.last_name}`}
             trigger={
-                <Button variant="ghost" className="hover:relative group">
-                <Trash className="h-4 w-4 text-red-600" />
+              <Button variant="ghost" className="hover:relative group">
+                <ClipboardList className="h-4 w-4 text-purple-600" />
                 <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
-                  Delete
+                  Notes
                 </span>
               </Button>
             }
-            onPatientDeleted={() => {
-                window.location.reload();
-                }}
-          />
+            />
+          </div>
         </div>
-        <div>
-        <AdmissionDischargeForm
-          admissionId={admission.admission_id}
-          patientName={`${admission.first_name} ${admission.last_name}`}
-          trigger={
-            <Button variant="ghost" className="hover:relative group">
-            <UserMinus className="h-4 w-4 text-blue-600" />
-            <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
-              Discharge
-            </span>
-            </Button>
-          }
-          onPatientDischarged={() => {
-            window.location.reload();
-          }
-          }
-        />
-        </div>
-      </div>
       )
     },
   },

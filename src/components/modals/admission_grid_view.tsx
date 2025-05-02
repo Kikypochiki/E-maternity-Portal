@@ -3,13 +3,24 @@
 import { useState } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, Trash, ClipboardList, UserMinus} from "lucide-react"
+import { Eye, Trash, ClipboardList, UserMinus, Pill, MoreVertical, FileText } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { AdmissionDeleteDialog } from "@/components/modals/admission_delete_dialog"
 import type { Admission } from "@/app/admin/admissions/columns"
 import { AdmissionDischargeForm } from "@/components/modals/admission_discharge_form"
 import { AdmissionView } from "@/components/modals/admission_view"
+import { DoctorsOrdersForm } from "@/components/modals/doctors_order_form"
+import { MedicationsForm } from "@/components/modals/medications_form"
+import { NotesAttachmentForm } from "@/components/modals/notes_attachment_form"
 
 interface AdmissionGridViewProps {
   data: Admission[]
@@ -82,46 +93,105 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
                 </div>
               </CardContent>
 
-              <CardFooter className="flex justify-between p-0">
-    <div className="grid grid-cols-3 w-full">
-      <AdmissionView
-        admission={admission}
-        patientId={admission.patient_id}
-        trigger={
-          <Button variant="ghost" className="rounded-lg py-3 h-auto w-full text-green-600">
-          <Eye className="h-4 w-4 mr-2" />
-          View
-      </Button>
-        }
-      />
-        <AdmissionDischargeForm
-                  admissionId={admission.admission_id}
-                  patientName={`${admission.first_name} ${admission.last_name}`}
+              <CardFooter className="flex justify-between p-4">
+                <AdmissionView
+                  admission={admission}
+                  patientId={admission.patient_id}
                   trigger={
-                    <Button variant="ghost" className="rounded-lg py-3 h-auto w-full text-blue-600">
-                    <UserMinus className="h-4 w-4 mr-1" />
-                    Discharge
+                    <Button variant="outline" size="sm" className="text-green-600">
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
                     </Button>
                   }
-                  onPatientDischarged={() => {
-                    window.location.reload();
-                  }
-                  }
                 />
-        <AdmissionDeleteDialog
-            admissionId={admission.admission_id}
-            patientName={`${admission.first_name} ${admission.last_name}`}
-            onPatientDeleted={onAdmissionDeleted}
-            trigger={
-                <Button variant="ghost" className="rounded-lg py-3 h-auto w-full text-red-600">
-                    <Trash className="h-4 w-4 mr-2" />
-                    Delete
-                </Button>
-            }
-        />
-    </div>
-      </CardFooter>
 
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Actions</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem asChild>
+                      <DoctorsOrdersForm
+                        admissionId={admission.admission_id}
+                        patientName={`${admission.first_name} ${admission.last_name}`}
+                        trigger={
+                          <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm">
+                            <ClipboardList className="h-4 w-4 mr-2 text-purple-600" />
+                            Doctor's Orders
+                          </button>
+                        }
+                        patientId={admission.patient_id}
+                      />
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <MedicationsForm
+                        admissionId={admission.admission_id}
+                        patientName={`${admission.first_name} ${admission.last_name}`}
+                        trigger={
+                          <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm">
+                            <Pill className="h-4 w-4 mr-2 text-purple-600" />
+                            Medications
+                          </button>
+                        }
+                        patientId={admission.patient_id}
+                      />
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <NotesAttachmentForm
+                        admissionId={admission.admission_id}
+                        patientName={`${admission.first_name} ${admission.last_name}`}
+                        trigger={
+                          <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm">
+                            <FileText className="h-4 w-4 mr-2 text-purple-600" />
+                            Notes
+                          </button>
+                        }
+                        patientId={admission.patient_id}
+                      />
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem asChild>
+                      <AdmissionDischargeForm
+                        admissionId={admission.admission_id}
+                        patientName={`${admission.first_name} ${admission.last_name}`}
+                        trigger={
+                          <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm">
+                            <UserMinus className="h-4 w-4 mr-2 text-blue-600" />
+                            Discharge
+                          </button>
+                        }
+                        onPatientDischarged={() => {
+                          window.location.reload()
+                        }}
+                      />
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="focus:bg-red-50">
+                      <AdmissionDeleteDialog
+                      admissionId={admission.admission_id}
+                      patientName={`${admission.first_name} ${admission.last_name}`}
+                      onPatientDeleted={onAdmissionDeleted}
+                      trigger={
+                        <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm text-red-600">
+                        <Trash className="h-4 w-4 mr-2 text-red-600" />
+                        Delete
+                        </button>
+                      }
+                      />
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </CardFooter>
             </Card>
           ))
         ) : (

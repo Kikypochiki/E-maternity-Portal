@@ -81,52 +81,36 @@ export function AdmissionDischargeForm({
 
   const handleDischarge = async () => {
     if (!finalDiagnosis || !finalDiagnosisIcdCode || !resultStatus || !resultCondition) {
-      toast("Please fill in all required fields")
-      return
+      toast("Please fill in all required fields");
+      return;
     }
-
+  
     try {
-      setIsProcessing(true)
-
-      // Get current date and time for discharge_datetime
-      const dischargeDateTime = new Date().toISOString()
-
-      // Fetch the admission record to get the created_at timestamp
+      setIsProcessing(true);
+      const dischargeDateTime = new Date().toISOString();
+  
+      // 1. First handle the Admission record updates
+      // --------------------------------------------------
       const { data: admissionData, error: admissionError } = await supabase
         .from("Admissions")
         .select("created_at")
         .eq("admission_id", admissionId)
-        .single()
-
+        .single();
+  
       if (admissionError) {
-        console.error("Error retrieving admission data:", admissionError.message)
-        toast("Failed to retrieve admission data. Please try again.")
-        return
+        console.error("Error retrieving admission data:", admissionError.message);
+        toast("Failed to retrieve admission data. Please try again.");
+        return;
       }
-
-      // Calculate length of stay in hours
-      const admissionDate = new Date(admissionData.created_at)
-      const dischargeDate = new Date()
-      const timeDifference = dischargeDate.getTime() - admissionDate.getTime()
-      const lengthOfStayHours = Math.round((timeDifference / (1000 * 3600)) * 10) / 10
-
-      // Remove the following line
-      // Combine the two result values
-
-      // Fetch the complete admission data BEFORE updating it
-      const { data: admissionFullData, error: fetchError } = await supabase
-        .from("Admissions")
-        .select("*")
-        .eq("admission_id", admissionId)
-        .single()
-
-      if (fetchError) {
-        console.error("Error fetching complete admission data:", fetchError.message)
-        toast("Warning: Failed to archive discharge record.")
-        return
-      }
-
-      // Update admission record
+  
+      // Calculate length of stay
+      const admissionDate = new Date(admissionData.created_at);
+      const dischargeDate = new Date();
+      const lengthOfStayHours = Math.round(
+        ((dischargeDate.getTime() - admissionDate.getTime()) / (1000 * 3600)) * 10
+      ) / 10;
+  
+      // Update admission status
       const { error: updateError } = await supabase
         .from("Admissions")
         .update({
@@ -138,47 +122,161 @@ export function AdmissionDischargeForm({
           result_status: resultStatus,
           result_condition: resultCondition,
         })
-        .eq("admission_id", admissionId)
-
+        .eq("admission_id", admissionId);
+  
       if (updateError) {
-        console.error("Error updating admission record:", updateError.message)
-        toast("Failed to discharge patient. Please try again.")
-        return
+        console.error("Error updating admission record:", updateError.message);
+        toast("Failed to discharge patient. Please try again.");
+        return;
+      }
+  
+      // Archive admission to history
+      const { data: admissionFullData, error: fetchError } = await supabase
+        .from("Admissions")
+        .select("*")
+        .eq("admission_id", admissionId)
+        .single();
+  
+      if (!fetchError && admissionFullData) {
+        const historyRecord = {
+          ...admissionFullData,
+          admission_status: "Discharged",
+          final_diagnosis: finalDiagnosis,
+          final_diagnosis_icd_code: finalDiagnosisIcdCode,
+          discharge_datetime: dischargeDateTime,
+          length_of_stay_hours: lengthOfStayHours,
+          result_status: resultStatus,
+          result_condition: resultCondition,
+        };
+  
+        await supabase.from("AdmissionsHistory").insert([historyRecord]);
+      }
+  
+      // 2. Handle DoctorsOrders separately
+      // --------------------------------------------------
+      const { data: orders, error: ordersError } = await supabase
+        .from("DoctorsOrders")
+        .select("*")
+        .eq("admission_id", admissionId);
+  
+      if (ordersError) {
+        console.error("Error fetching doctor's orders:", ordersError.message);
+        toast("Warning: Failed to fetch doctor's orders for archiving");
+      } else if (orders && orders.length > 0) {
+        const ordersForHistory = orders.map(order => ({
+          ...order,
+        }));
+  
+        const { error: historyInsertError } = await supabase
+          .from("DoctorsOrdersHistory")
+          .insert(ordersForHistory);
+  
+        if (historyInsertError) {
+          console.error("Error archiving doctor's orders:", historyInsertError.message);
+          toast("Warning: Failed to archive doctor's orders");
+        }
+  
+        const { error: deleteError } = await supabase
+          .from("DoctorsOrders")
+          .delete()
+          .eq("admission_id", admissionId)
+          .eq("patient_id", admissionFullData.patient_id);
+  
+        if (deleteError) {
+          console.error("Error deleting doctor's orders:", deleteError.message);
+          toast("Warning: Failed to delete active doctor's orders");
+        }
+      }
+  
+      // 3. Handle Medications separately
+      // --------------------------------------------------
+      const { data: medications, error: medicationsError } = await supabase
+        .from("Medications")
+        .select("*")
+        .eq("admission_id", admissionId)
+        .eq("patient_id", admissionFullData.patient_id);
+        
+  
+      if (medicationsError) {
+        console.error("Error fetching medications:", medicationsError.message);
+        toast("Warning: Failed to fetch medications for archiving");
+      } else if (medications && medications.length > 0) {
+        const medicationsForHistory = medications.map(medication => ({
+          ...medication,
+        }));
+  
+        const { error: medHistoryInsertError } = await supabase
+          .from("MedicationsHistory")
+          .insert(medicationsForHistory);
+  
+        if (medHistoryInsertError) {
+          console.error("Error archiving medications:", medHistoryInsertError.message);
+          toast("Warning: Failed to archive medications");
+        }
+  
+        const { error: deleteMedError } = await supabase
+          .from("Medications")
+          .delete()
+          .eq("admission_id", admissionId)
+          .eq("patient_id", admissionFullData.patient_id);
+          
+        if (deleteMedError) {
+          console.error("Error deleting medications:", deleteMedError.message);
+          toast("Warning: Failed to delete active medications");
+        }
       }
 
-      // Create a new object with both the original data and the discharge updates
-      const historyRecord = {
-        ...admissionFullData,
-        admission_status: "Discharged",
-        final_diagnosis: finalDiagnosis,
-        final_diagnosis_icd_code: finalDiagnosisIcdCode,
-        discharge_datetime: dischargeDateTime,
-        length_of_stay_hours: lengthOfStayHours,
-        result_status: resultStatus,
-        result_condition: resultCondition,
+      // 4. Handle Notes separately
+      const { data: notes, error: notesError } = await supabase
+        .from("Notes")
+        .select("*")
+        .eq("admission_id", admissionId)
+        .eq("patient_id", admissionFullData.patient_id);
+        
+  
+      if (notesError) {
+        console.error("Error fetching notes:", notesError.message);
+        toast("Warning: Failed to fetch notes for archiving");
+      } else if (notes && notes.length > 0) {
+        const notesForHistory = notes.map(notes => ({
+          ...notes,
+        }));
+  
+        const { error: notesHistoryInsertError } = await supabase
+          .from("NotesHistory")
+          .insert(notesForHistory);
+  
+        if (notesHistoryInsertError) {
+          console.error("Error archiving notes:", notesHistoryInsertError.message);
+          toast("Warning: Failed to archive notes");
+        }
+  
+        const { error: deleteNotesError } = await supabase
+          .from("Notes")
+          .delete()
+          .eq("admission_id", admissionId)
+          .eq("patient_id", admissionFullData.patient_id);
+          
+        if (deleteNotesError) {
+          console.error("Error deleting notes:", deleteNotesError.message);
+          toast("Warning: Failed to delete active notes");
+        }
       }
-
-      // Insert the data into AdmissionsHistory table
-      const { error: historyError } = await supabase.from("AdmissionsHistory").insert([historyRecord])
-
-      if (historyError) {
-        console.error("Error copying to history:", historyError.message)
-        toast("Warning: Failed to archive discharge record, but discharge was successful.")
-      }
-
-      toast("Patient has been discharged successfully.")
-
+  
+      // 4. Finalize
+      // --------------------------------------------------
+      toast("Patient has been discharged successfully. All records archived.");
       if (onPatientDischarged) {
-        onPatientDischarged()
+        onPatientDischarged();
       }
     } catch (error) {
-      console.error("Unexpected error:", error)
-      toast("An unexpected error occurred. Please try again.")
+      console.error("Unexpected error:", error);
+      toast("An unexpected error occurred. Please try again.");
     } finally {
-      setIsProcessing(false)
-      setIsOpen(false)
+      setIsProcessing(false);
+      setIsOpen(false);
     }
-  }
+  };
 
   return (
     <>
