@@ -18,6 +18,7 @@ import { FileText, Clock } from "lucide-react"
 import { format } from "date-fns"
 import { AdmissionHistoryDetail } from "./admission-history-detail"
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog"
+import { Pill, Stethoscope, FileTextIcon } from "lucide-react"
 import { toast } from "sonner"
 
 interface Patient {
@@ -64,6 +65,33 @@ interface AdmissionsHistory {
   created_at: string
 }
 
+interface DoctorsOrder {
+  order_id: string
+  created_at: string
+  progress_notes: string
+  doctors_order: string
+  patient_id: string
+  admission_id: string
+}
+
+interface Medication {
+  medication_id: string
+  created_at: string
+  patient_id: string
+  admission_id: string
+  medication: string
+  date_to_take: string
+  time_to_take: string
+}
+
+interface Note {
+  notes_id: string
+  created_at: string
+  patient_id: string
+  admission_id: string
+  notes_content: string
+}
+
 interface PatientBasicInfoViewProps {
   trigger: React.ReactNode
   patient: Patient
@@ -101,6 +129,22 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [admissionToDelete, setAdmissionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null)
+  const [medicationToDelete, setMedicationToDelete] = useState<string | null>(null)
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
+  const [deleteOrderDialogOpen, setDeleteOrderDialogOpen] = useState(false)
+  const [deleteMedicationDialogOpen, setDeleteMedicationDialogOpen] = useState(false)
+  const [deleteNoteDialogOpen, setDeleteNoteDialogOpen] = useState(false)
+  const [isDeletingOrder, setIsDeletingOrder] = useState(false)
+  const [isDeletingMedication, setIsDeletingMedication] = useState(false)
+  const [isDeletingNote, setIsDeletingNote] = useState(false)
+
+  const [doctorsOrders, setDoctorsOrders] = useState<DoctorsOrder[]>([])
+  const [medications, setMedications] = useState<Medication[]>([])
+  const [notes, setNotes] = useState<Note[]>([])
+  const [isLoadingDoctorsOrders, setIsLoadingDoctorsOrders] = useState(false)
+  const [isLoadingMedications, setIsLoadingMedications] = useState(false)
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false)
 
   useEffect(() => {
     if (patient) {
@@ -145,29 +189,66 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
     }
   }
 
-  const handleDeleteAdmission = async () => {
-    if (!admissionToDelete) return
+  const fetchDoctorsOrders = async () => {
+    if (!patient?.patient_id) return
 
-    setIsDeleting(true)
+    setIsLoadingDoctorsOrders(true)
     try {
-      const { error } = await supabase.from("AdmissionsHistory").delete().eq("admission_id", admissionToDelete)
+      const { data, error } = await supabase
+        .from("DoctorsOrdersHistory")
+        .select("*")
+        .eq("patient_id", patient.patient_id)
 
       if (error) {
-        console.error("Error deleting admission:", error)
-        toast("Failed to delete admission record. Please try again.")
+        console.error("Error fetching doctors orders:", error)
         return
       }
 
-      // Update the local state to remove the deleted admission
-      setAdmissionsHistories((prev) => prev.filter((history) => history.admission_id !== admissionToDelete))
-
-      toast("Admission record deleted successfully.")
+      setDoctorsOrders(data || [])
     } catch (error) {
-      console.error("Error in delete operation:", error)
-      toast("An unexpected error occurred. Please try again.")
+      console.error("Error in fetch operation:", error)
     } finally {
-      setIsDeleting(false)
-      setAdmissionToDelete(null)
+      setIsLoadingDoctorsOrders(false)
+    }
+  }
+
+  const fetchMedications = async () => {
+    if (!patient?.patient_id) return
+
+    setIsLoadingMedications(true)
+    try {
+      const { data, error } = await supabase.from("MedicationsHistory").select("*").eq("patient_id", patient.patient_id)
+
+      if (error) {
+        console.error("Error fetching medications:", error)
+        return
+      }
+
+      setMedications(data || [])
+    } catch (error) {
+      console.error("Error in fetch operation:", error)
+    } finally {
+      setIsLoadingMedications(false)
+    }
+  }
+
+  const fetchNotes = async () => {
+    if (!patient?.patient_id) return
+
+    setIsLoadingNotes(true)
+    try {
+      const { data, error } = await supabase.from("NotesHistory").select("*").eq("patient_id", patient.patient_id)
+
+      if (error) {
+        console.error("Error fetching notes:", error)
+        return
+      }
+
+      setNotes(data || [])
+    } catch (error) {
+      console.error("Error in fetch operation:", error)
+    } finally {
+      setIsLoadingNotes(false)
     }
   }
 
@@ -176,6 +257,24 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
       fetchAdmissionsHistories()
     }
   }, [patient?.patient_id])
+
+  useEffect(() => {
+    if (patient?.patient_id && activeTab === "doctors-orders") {
+      fetchDoctorsOrders()
+    }
+  }, [patient?.patient_id, activeTab])
+
+  useEffect(() => {
+    if (patient?.patient_id && activeTab === "medications") {
+      fetchMedications()
+    }
+  }, [patient?.patient_id, activeTab])
+
+  useEffect(() => {
+    if (patient?.patient_id && activeTab === "notes") {
+      fetchNotes()
+    }
+  }, [patient?.patient_id, activeTab])
 
   const calculateAge = (dateOfBirth: string) => {
     try {
@@ -311,12 +410,130 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
     },
   }
 
+  async function handleDeleteAdmission(): Promise<void> {
+    if (!admissionToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase.from("AdmissionsHistory").delete().eq("admission_id", admissionToDelete)
+
+      if (error) {
+        console.error("Error deleting admission record:", error)
+        return
+      }
+
+      setAdmissionsHistories((prev) => prev.filter((history) => history.admission_id !== admissionToDelete))
+      console.log("Admission record deleted successfully")
+    } catch (error) {
+      console.error("Error in delete operation:", error)
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setAdmissionToDelete(null)
+    }
+  }
+
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete) return
+
+    setIsDeletingOrder(true)
+    try {
+      const { error } = await supabase.from("DoctorsOrdersHistory").delete().eq("order_id", orderToDelete)
+
+      if (error) {
+        console.error("Error deleting order:", error)
+        toast("Failed to delete order. Please try again.")
+        return
+      }
+
+      // Update the local state to remove the deleted order
+      setDoctorsOrders((prev) => prev.filter((order) => order.order_id !== orderToDelete))
+
+      toast("Order deleted successfully.")
+    } catch (error) {
+      console.error("Error in delete operation:", error)
+      toast("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsDeletingOrder(false)
+      setDeleteOrderDialogOpen(false)
+      setOrderToDelete(null)
+    }
+  }
+
+  const handleDeleteMedication = async () => {
+    if (!medicationToDelete) return
+
+    setIsDeletingMedication(true)
+    try {
+      const { error } = await supabase.from("MedicationsHistory").delete().eq("medication_id", medicationToDelete)
+
+      if (error) {
+        console.error("Error deleting medication:", error)
+        toast("Failed to delete medication. Please try again.")
+        return
+      }
+
+      // Update the local state to remove the deleted medication
+      setMedications((prev) => prev.filter((medication) => medication.medication_id !== medicationToDelete))
+
+      toast("Medication deleted successfully.")
+    } catch (error) {
+      console.error("Error in delete operation:", error)
+      toast("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsDeletingMedication(false)
+      setDeleteMedicationDialogOpen(false)
+      setMedicationToDelete(null)
+    }
+  }
+
+  const handleDeleteNote = async () => {
+    if (!noteToDelete) return
+
+    setIsDeletingNote(true)
+    try {
+      const { error } = await supabase.from("NotesHistory").delete().eq("notes_id", noteToDelete)
+
+      if (error) {
+        console.error("Error deleting note:", error)
+        toast("Failed to delete note. Please try again.")
+        return
+      }
+
+      // Update the local state to remove the deleted note
+      setNotes((prev) => prev.filter((note) => note.notes_id !== noteToDelete))
+
+      toast("Note deleted successfully.")
+    } catch (error) {
+      console.error("Error in delete operation:", error)
+      toast("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsDeletingNote(false)
+      setDeleteNoteDialogOpen(false)
+      setNoteToDelete(null)
+    }
+  }
+
+  // Add inline style for no-scrollbar utility
+  const noScrollbarStyle = `
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`
+
   return (
     <Sheet>
+      <style jsx global>
+        {noScrollbarStyle}
+      </style>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side="right"
-        className="w-full max-w-md md:max-w-lg overflow-y-auto bg-gradient-to-b from-white to-slate-50 p-6 rounded-l-xl border-l shadow-lg"
+        className="w-full max-w-md md:max-w-xl lg:max-w-2xl overflow-y-auto bg-gradient-to-b from-white to-slate-50 p-6 rounded-l-xl border-l shadow-lg"
       >
         <SheetHeader className="space-y-2">
           <div className="flex items-center justify-between">
@@ -391,14 +608,41 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
         </SheetHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="info" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
+          <TabsList className="flex w-full mb-6 overflow-x-auto no-scrollbar">
+            <TabsTrigger
+              value="info"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
+            >
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Patient Info</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span>Admission History</span>
+            <TabsTrigger
+              value="history"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
+            >
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Admission</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="doctors-orders"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
+            >
+              <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Orders</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="medications"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
+            >
+              <Pill className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Medications</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="notes"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
+            >
+              <FileTextIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Notes</span>
             </TabsTrigger>
           </TabsList>
 
@@ -873,6 +1117,323 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
               </div>
             </motion.div>
           </TabsContent>
+
+          <TabsContent value="doctors-orders">
+            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="py-4">
+              <div className="space-y-6">
+                <motion.div className="space-y-4" variants={slideUp}>
+                  <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Doctor's Orders</h4>
+
+                  {isLoadingDoctorsOrders ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <svg
+                          className="animate-spin h-8 w-8 text-primary"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <p className="text-sm text-slate-500">Loading doctor's orders...</p>
+                      </div>
+                    </div>
+                  ) : doctorsOrders.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <Stethoscope className="h-12 w-12 text-slate-300" />
+                        <h3 className="text-lg font-medium text-slate-700">No doctor's orders</h3>
+                        <p className="text-sm text-slate-500">
+                          This patient doesn&#39;t have any doctor&#39;s orders yet.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {doctorsOrders.map((order) => (
+                        <Card
+                          key={order.order_id}
+                          className="overflow-hidden border border-slate-200 hover:shadow-md transition-shadow duration-200"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                    <Stethoscope className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-slate-700">Order ID: {order.order_id}</h4>
+                                    <p className="text-xs text-slate-500">
+                                      {order.created_at
+                                        ? format(new Date(order.created_at), "MMM d, yyyy • h:mm a")
+                                        : "Unknown date"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                    {order.admission_id}
+                                  </Badge>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => {
+                                      setOrderToDelete(order.order_id)
+                                      setDeleteOrderDialogOpen(true)
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div>
+                                  <h5 className="text-xs font-medium text-slate-500 mb-1">Doctor's Order</h5>
+                                  <p className="text-sm text-slate-800 p-3 bg-slate-50 rounded-md">
+                                    {order.doctors_order}
+                                  </p>
+                                </div>
+
+                                {order.progress_notes && (
+                                  <div>
+                                    <h5 className="text-xs font-medium text-slate-500 mb-1">Progress Notes</h5>
+                                    <p className="text-sm text-slate-800 p-3 bg-slate-50 rounded-md">
+                                      {order.progress_notes}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="medications">
+            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="py-4">
+              <div className="space-y-6">
+                <motion.div className="space-y-4" variants={slideUp}>
+                  <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Medications</h4>
+
+                  {isLoadingMedications ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <svg
+                          className="animate-spin h-8 w-8 text-primary"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <p className="text-sm text-slate-500">Loading medications...</p>
+                      </div>
+                    </div>
+                  ) : medications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <Pill className="h-12 w-12 text-slate-300" />
+                        <h3 className="text-lg font-medium text-slate-700">No medications</h3>
+                        <p className="text-sm text-slate-500">This patient doesn&#39;t have any medications yet.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {medications.map((medication) => (
+                        <Card
+                          key={medication.medication_id}
+                          className="overflow-hidden border border-slate-200 hover:shadow-md transition-shadow duration-200"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                    <Pill className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-slate-700">{medication.medication}</h4>
+                                    <p className="text-xs text-slate-500">
+                                      {medication.created_at
+                                        ? format(new Date(medication.created_at), "MMM d, yyyy")
+                                        : "Unknown date"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                    {medication.medication_id}
+                                  </Badge>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => {
+                                      setMedicationToDelete(medication.medication_id)
+                                      setDeleteMedicationDialogOpen(true)
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h5 className="text-xs font-medium text-slate-500 mb-1">Date to Take</h5>
+                                  <p className="text-sm text-slate-800 p-2 bg-slate-50 rounded-md">
+                                    {medication.date_to_take
+                                      ? format(new Date(medication.date_to_take), "MMM d, yyyy")
+                                      : "Not specified"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <h5 className="text-xs font-medium text-slate-500 mb-1">Time to Take</h5>
+                                  <p className="text-sm text-slate-800 p-2 bg-slate-50 rounded-md">
+                                    {medication.time_to_take || "Not specified"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="notes">
+            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="py-4">
+              <div className="space-y-6">
+                <motion.div className="space-y-4" variants={slideUp}>
+                  <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Notes</h4>
+
+                  {isLoadingNotes ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <svg
+                          className="animate-spin h-8 w-8 text-primary"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <p className="text-sm text-slate-500">Loading notes...</p>
+                      </div>
+                    </div>
+                  ) : notes.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <FileTextIcon className="h-12 w-12 text-slate-300" />
+                        <h3 className="text-lg font-medium text-slate-700">No notes</h3>
+                        <p className="text-sm text-slate-500">This patient doesn&#39;t have any notes yet.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {notes.map((note) => (
+                        <Card
+                          key={note.notes_id}
+                          className="overflow-hidden border border-slate-200 hover:shadow-md transition-shadow duration-200"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                    <FileTextIcon className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-slate-700">Note ID: {note.notes_id}</h4>
+                                    <p className="text-xs text-slate-500">
+                                      {note.created_at
+                                        ? format(new Date(note.created_at), "MMM d, yyyy • h:mm a")
+                                        : "Unknown date"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                    {note.admission_id}
+                                  </Badge>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => {
+                                      setNoteToDelete(note.notes_id)
+                                      setDeleteNoteDialogOpen(true)
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div>
+                                <h5 className="text-xs font-medium text-slate-500 mb-1">Note Content</h5>
+                                <p className="text-sm text-slate-800 p-3 bg-slate-50 rounded-md whitespace-pre-wrap">
+                                  {note.notes_content}
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            </motion.div>
+          </TabsContent>
         </Tabs>
         {/* Delete Confirmation Dialog */}
         <DeleteConfirmationDialog
@@ -885,6 +1446,44 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
           title="Delete Admission Record"
           description="Are you sure you want to delete this admission record? This action cannot be undone."
           isDeleting={isDeleting}
+        />
+        {/* Delete Order Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={deleteOrderDialogOpen}
+          onClose={() => {
+            setDeleteOrderDialogOpen(false)
+            setOrderToDelete(null)
+          }}
+          onConfirm={handleDeleteOrder}
+          title="Delete Doctor's Order"
+          description="Are you sure you want to delete this doctor's order? This action cannot be undone."
+          isDeleting={isDeletingOrder}
+        />
+
+        {/* Delete Medication Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={deleteMedicationDialogOpen}
+          onClose={() => {
+            setDeleteMedicationDialogOpen(false)
+            setMedicationToDelete(null)
+          }}
+          onConfirm={handleDeleteMedication}
+          title="Delete Medication Record"
+          description="Are you sure you want to delete this medication record? This action cannot be undone."
+          isDeleting={isDeletingMedication}
+        />
+
+        {/* Delete Note Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={deleteNoteDialogOpen}
+          onClose={() => {
+            setDeleteNoteDialogOpen(false)
+            setNoteToDelete(null)
+          }}
+          onConfirm={handleDeleteNote}
+          title="Delete Note"
+          description="Are you sure you want to delete this note? This action cannot be undone."
+          isDeleting={isDeletingNote}
         />
       </SheetContent>
     </Sheet>
