@@ -11,7 +11,24 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { User, Phone, Calendar, MapPin, Edit, Save, X, Heart, Globe, Home, BookOpen, Users, Trash2, Eye } from "lucide-react"
+import {
+  User,
+  Phone,
+  Calendar,
+  MapPin,
+  Edit,
+  Save,
+  X,
+  Heart,
+  Globe,
+  Home,
+  BookOpen,
+  Users,
+  Trash2,
+  Eye,
+  FileDown,
+  Download,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileText, Clock } from "lucide-react"
@@ -92,6 +109,12 @@ interface Note {
   notes_content: string
 }
 
+interface LabFile {
+  id: string
+  patient_id: string
+  file_name: string
+}
+
 interface PatientBasicInfoViewProps {
   trigger: React.ReactNode
   patient: Patient
@@ -145,6 +168,12 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
   const [isLoadingDoctorsOrders, setIsLoadingDoctorsOrders] = useState(false)
   const [isLoadingMedications, setIsLoadingMedications] = useState(false)
   const [isLoadingNotes, setIsLoadingNotes] = useState(false)
+
+  const [labFiles, setLabFiles] = useState<LabFile[]>([])
+  const [isLoadingLabFiles, setIsLoadingLabFiles] = useState(false)
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null)
+  const [deleteFileDialogOpen, setDeleteFileDialogOpen] = useState(false)
+  const [isDeletingFile, setIsDeletingFile] = useState(false)
 
   useEffect(() => {
     if (patient) {
@@ -252,6 +281,26 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
     }
   }
 
+  const fetchLabFiles = async () => {
+    if (!patient?.patient_id) return
+
+    setIsLoadingLabFiles(true)
+    try {
+      const { data, error } = await supabase.from("LabFiles").select("*").eq("patient_id", patient.patient_id)
+
+      if (error) {
+        console.error("Error fetching lab files:", error)
+        return
+      }
+
+      setLabFiles(data || [])
+    } catch (error) {
+      console.error("Error in fetch operation:", error)
+    } finally {
+      setIsLoadingLabFiles(false)
+    }
+  }
+
   useEffect(() => {
     if (patient?.patient_id) {
       fetchAdmissionsHistories()
@@ -273,6 +322,12 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
   useEffect(() => {
     if (patient?.patient_id && activeTab === "notes") {
       fetchNotes()
+    }
+  }, [patient?.patient_id, activeTab])
+
+  useEffect(() => {
+    if (patient?.patient_id && activeTab === "lab-files") {
+      fetchLabFiles()
     }
   }, [patient?.patient_id, activeTab])
 
@@ -344,7 +399,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
       console.log("Patient updated successfully:", data)
       setIsEditing(false)
       window.location.reload()
-      
+
       if (onEdit) onEdit()
     } catch (error) {
       console.error("Error in update operation:", error)
@@ -516,6 +571,74 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
     }
   }
 
+  const handleDeleteFile = async () => {
+    if (!fileToDelete) return
+
+    setIsDeletingFile(true)
+    try {
+      // First delete the file from storage
+      const { error: storageError } = await supabase.storage.from("lab.results").remove([fileToDelete])
+
+      if (storageError) {
+        console.error("Error deleting file from storage:", storageError)
+        toast("Failed to delete file from storage. Please try again.")
+        return
+      }
+
+      // Then delete the record from the database
+      const { error: dbError } = await supabase.from("LabFiles").delete().eq("id", fileToDelete)
+
+      if (dbError) {
+        console.error("Error deleting file record:", dbError)
+        toast("Failed to delete file record. Please try again.")
+        return
+      }
+
+      // Update the local state to remove the deleted file
+      setLabFiles((prev) => prev.filter((file) => file.id !== fileToDelete))
+
+      toast("File deleted successfully.")
+    } catch (error) {
+      console.error("Error in delete operation:", error)
+      toast("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsDeletingFile(false)
+      setDeleteFileDialogOpen(false)
+      setFileToDelete(null)
+    }
+  }
+
+const handleDownloadFile = async (filePath: string, fileName: string) => {
+    try {
+      toast.loading(`Downloading ${fileName}...`)
+
+      const { data, error } = await supabase.storage.from("lab.results").download(filePath)
+
+      if (error) {
+        console.error("Error getting file URL:", error)
+        toast.dismiss()
+        toast.error("Failed to get file URL. Please try again.")
+        return
+      }
+
+      const url = URL.createObjectURL(data)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      toast.dismiss()
+      toast.success(`${fileName} downloaded successfully`)
+    } catch (error) {
+      console.error("Error in download operation:", error)
+      toast.dismiss()
+      toast.error("An unexpected error occurred. Please try again.")
+    }
+  }
+
   // Add inline style for no-scrollbar utility
   const noScrollbarStyle = `
   .no-scrollbar::-webkit-scrollbar {
@@ -616,7 +739,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
               className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
             >
               <User className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Patient Info</span>
+              <span>Info</span>
             </TabsTrigger>
             <TabsTrigger
               value="history"
@@ -645,6 +768,13 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
             >
               <FileTextIcon className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Notes</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="lab-files"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap"
+            >
+              <FileDown className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Lab Files</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1157,9 +1287,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                       <div className="flex flex-col items-center gap-2 text-center">
                         <Stethoscope className="h-12 w-12 text-slate-300" />
                         <h3 className="text-lg font-medium text-slate-700">No orders</h3>
-                        <p className="text-sm text-slate-500">
-                          This patient doesn&#39;t have any orders yet.
-                        </p>
+                        <p className="text-sm text-slate-500">This patient doesn&#39;t have any orders yet.</p>
                       </div>
                     </div>
                   ) : (
@@ -1430,6 +1558,98 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
               </div>
             </motion.div>
           </TabsContent>
+
+          <TabsContent value="lab-files">
+            <motion.div initial="hidden" animate="visible" variants={fadeIn} className="py-4">
+              <div className="space-y-6">
+                <motion.div className="space-y-4" variants={slideUp}>
+                  <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Lab Files</h4>
+
+                  {isLoadingLabFiles ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <svg
+                          className="animate-spin h-8 w-8 text-primary"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <p className="text-sm text-slate-500">Loading lab files...</p>
+                      </div>
+                    </div>
+                  ) : labFiles.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <FileDown className="h-12 w-12 text-slate-300" />
+                        <h3 className="text-lg font-medium text-slate-700">No lab files</h3>
+                        <p className="text-sm text-slate-500">This patient doesn&#39;t have any lab files yet.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {labFiles.map((file) => (
+                        <Card
+                          key={file.id}
+                          className="overflow-hidden border border-slate-200 hover:shadow-md transition-shadow duration-200"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                    <FileDown className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-slate-700">{file.file_name}</h4>
+                                    <p className="text-xs text-slate-500">File ID: {file.id}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-green-600"
+                                    onClick={() => handleDownloadFile(`${patient.patient_id}/${file.file_name}`, file.file_name)}
+                                  >
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600"
+                                    onClick={() => {
+                                      setFileToDelete(file.id)
+                                      setDeleteFileDialogOpen(true)
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            </motion.div>
+          </TabsContent>
         </Tabs>
         {/* Delete Confirmation Dialog */}
         <DeleteConfirmationDialog
@@ -1480,6 +1700,19 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
           title="Delete Note"
           description="Are you sure you want to delete this note? This action cannot be undone."
           isDeleting={isDeletingNote}
+        />
+
+        {/* Delete File Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={deleteFileDialogOpen}
+          onClose={() => {
+            setDeleteFileDialogOpen(false)
+            setFileToDelete(null)
+          }}
+          onConfirm={handleDeleteFile}
+          title="Delete Lab File"
+          description="Are you sure you want to delete this lab file? This action cannot be undone."
+          isDeleting={isDeletingFile}
         />
       </SheetContent>
     </Sheet>
