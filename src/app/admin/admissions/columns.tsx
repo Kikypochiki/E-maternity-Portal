@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye, Trash, UserMinus, Stethoscope, Pill, ClipboardList} from "lucide-react"
+import { ArrowUpDown, Eye, Trash, UserMinus, Stethoscope, Pill, ClipboardList, Upload} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AdmissionDeleteDialog } from "@/components/modals/admission_delete_dialog"
@@ -10,6 +10,7 @@ import { AdmissionView } from "@/components/modals/admission_view"
 import { DoctorsOrdersForm } from "@/components/modals/doctors_order_form"
 import { MedicationsForm } from "@/components/modals/medications_form"
 import { NotesAttachmentForm } from "@/components/modals/notes_attachment_form"
+import { LabFilesUpload } from "@/components/modals/lab-files-upload"
 
 // Define the Admission type based on your database schema
 export type Admission = {
@@ -185,6 +186,21 @@ export const columns: ColumnDef<Admission>[] = [
                 </span>
               </Button>
             }
+            />
+          </div>
+          <div>
+            <LabFilesUpload
+              admissionId={admission.admission_id}
+              patientId={admission.patient_id}
+              patientName={`${admission.first_name} ${admission.last_name}`}
+              trigger={
+                <Button variant="ghost" className="hover:relative group">
+                  <Upload className="h-4 w-4 text-purple-600" />
+                  <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
+                    Upload Lab Files
+                  </span>
+                </Button>
+              }
             />
           </div>
         </div>

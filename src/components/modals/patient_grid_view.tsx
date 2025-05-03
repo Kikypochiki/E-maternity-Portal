@@ -57,7 +57,7 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
                                     {/* Patient name and G/P */}
                                     <div className="w-full p-4 text-center space-y-1">
                                         <h3 className="font-bold text-lg tracking-wide text-primary">
-                                            {patient.last_name.toUpperCase()}, {patient.first_name.charAt(0).toUpperCase()}.
+                                            {patient.last_name.toUpperCase()}, {patient.first_name.toUpperCase()}
                                         </h3>
                                         <Badge variant="outline" className="text-sm font-medium  bg-green-50 text-green-700 border-green-200">
                                             G{patient.gravidity}  P{patient.parity}
@@ -66,17 +66,13 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
                                 </div>
                             </CardContent>
 
-                            <CardFooter className="flex justify-between p-0">
-                                <div className="grid grid-cols-2 w-full">
+                            <CardFooter className="flex justify-between p-4">
                                     <PatientBasicInfoView
                                         trigger={
-                                            <Button 
-                                                variant="ghost" 
-                                                className="rounded-none py-3 h-auto w-full border-r text-green-600"
-                                            >
-                                                <Eye className="h-4 w-4 mr-2" />
-                                                View
-                                            </Button>
+                                            <Button variant="outline" size="sm" className="text-green-600">
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            View
+                                          </Button>
                                         }
                                         patient={patient}
                                     />
@@ -86,15 +82,13 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
                                         onPatientDeleted={onPatientDeleted}
                                         trigger={
                                                 <Button 
-                                                        variant="ghost" 
-                                                        className="rounded-none py-3 h-auto w-full text-red-600"
+                                                        variant="outline" 
+                                                        className="text-red-600"
                                                 >
-                                                        <Trash className="h-4 w-4 mr-2" />
-                                                        Delete
+                                                        <Trash className="h-4 w-4" />
                                                 </Button>
                                         }
                                     />
-                                </div>
                             </CardFooter>
                         </Card>
                     ))

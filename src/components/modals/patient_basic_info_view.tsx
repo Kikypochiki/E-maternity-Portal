@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { User, Phone, Calendar, MapPin, Edit, Save, X, Heart, Globe, Home, BookOpen, Users, Trash2 } from "lucide-react"
+import { User, Phone, Calendar, MapPin, Edit, Save, X, Heart, Globe, Home, BookOpen, Users, Trash2, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileText, Clock } from "lucide-react"
@@ -343,6 +343,8 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
 
       console.log("Patient updated successfully:", data)
       setIsEditing(false)
+      window.location.reload()
+      
       if (onEdit) onEdit()
     } catch (error) {
       console.error("Error in update operation:", error)
@@ -1089,15 +1091,15 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                                   <AdmissionHistoryDetail
                                     admission={history}
                                     trigger={
-                                      <Button variant="outline" size="sm">
-                                        View
+                                      <Button variant="outline" size="sm" className="text-green-600">
+                                        <Eye className="h-4 w-4" />
                                       </Button>
                                     }
                                   />
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    className="text-red-600"
                                     onClick={() => {
                                       setAdmissionToDelete(history.admission_id)
                                       setDeleteDialogOpen(true)
@@ -1154,9 +1156,9 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                     <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                       <div className="flex flex-col items-center gap-2 text-center">
                         <Stethoscope className="h-12 w-12 text-slate-300" />
-                        <h3 className="text-lg font-medium text-slate-700">No doctor&#39;s orders</h3>
+                        <h3 className="text-lg font-medium text-slate-700">No orders</h3>
                         <p className="text-sm text-slate-500">
-                          This patient doesn&#39;t have any doctor&#39;s orders yet.
+                          This patient doesn&#39;t have any orders yet.
                         </p>
                       </div>
                     </div>
@@ -1184,13 +1186,10 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                    {order.admission_id}
-                                  </Badge>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    className="text-red-600"
                                     onClick={() => {
                                       setOrderToDelete(order.order_id)
                                       setDeleteOrderDialogOpen(true)
@@ -1299,7 +1298,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    className="text-red-600"
                                     onClick={() => {
                                       setMedicationToDelete(medication.medication_id)
                                       setDeleteMedicationDialogOpen(true)
@@ -1401,13 +1400,10 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                                    {note.admission_id}
-                                  </Badge>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    className="text-red-600"
                                     onClick={() => {
                                       setNoteToDelete(note.notes_id)
                                       setDeleteNoteDialogOpen(true)

@@ -83,7 +83,7 @@ export function AdmissionHistoryDetail({ admission, trigger }: AdmissionHistoryD
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side="right"
-        className="w-full max-w-md md:max-w-lg overflow-y-auto bg-gradient-to-b from-white to-slate-50 p-6 rounded-l-xl border-l shadow-lg"
+        className="w-full max-w-md md:max-w-xl lg:max-w-2xl overflow-y-auto bg-gradient-to-b from-white to-slate-50 p-6 rounded-l-xl border-l shadow-lg"
       >
         <SheetHeader className="space-y-2">
           <div className="flex items-center justify-between">

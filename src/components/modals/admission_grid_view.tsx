@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, Trash, ClipboardList, UserMinus, Pill, MoreVertical, FileText } from "lucide-react"
+import { Eye, Trash, ClipboardList, UserMinus, Pill, MoreVertical, FileText, Upload} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -21,6 +21,7 @@ import { AdmissionView } from "@/components/modals/admission_view"
 import { DoctorsOrdersForm } from "@/components/modals/doctors_order_form"
 import { MedicationsForm } from "@/components/modals/medications_form"
 import { NotesAttachmentForm } from "@/components/modals/notes_attachment_form"
+import { LabFilesUpload } from "@/components/modals/lab-files-upload"
 
 interface AdmissionGridViewProps {
   data: Admission[]
@@ -48,7 +49,7 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
     <div className="w-full space-y-4 p-7">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search by last name or admission ID..."
+          placeholder="Search Last Name..."
           value={searchQuery}
           onChange={(event) => {
             setSearchQuery(event.target.value)
@@ -173,6 +174,20 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
                         onPatientDischarged={() => {
                           window.location.reload()
                         }}
+                      />
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <LabFilesUpload
+                        admissionId={admission.admission_id}
+                        patientId={admission.patient_id}
+                        patientName={`${admission.first_name} ${admission.last_name}`}
+                        trigger={
+                          <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm">
+                            <Upload className="h-4 w-4 mr-2 text-purple-600" />
+                            Upload Lab Files
+                          </button>
+                        }
                       />
                     </DropdownMenuItem>
 
