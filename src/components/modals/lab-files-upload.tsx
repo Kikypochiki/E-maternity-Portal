@@ -174,7 +174,7 @@ export function LabFilesUpload({ patientId, patientName, onFileUploaded, trigger
         const filePath = `${patientId}/${fileName}`
 
         // Upload file to storage
-        const { error: uploadError, data } = await supabase.storage.from("lab.results").upload(filePath, file, {
+        const { error: uploadError } = await supabase.storage.from("lab.results").upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
         })
