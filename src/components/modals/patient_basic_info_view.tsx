@@ -1122,7 +1122,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
             <motion.div initial="hidden" animate="visible" variants={fadeIn} className="py-4">
               <div className="space-y-6">
                 <motion.div className="space-y-4" variants={slideUp}>
-                  <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Doctor's Orders</h4>
+                  <h4 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Doctor&#39;s Orders</h4>
 
                   {isLoadingDoctorsOrders ? (
                     <div className="flex items-center justify-center p-8">
@@ -1147,14 +1147,14 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        <p className="text-sm text-slate-500">Loading doctor's orders...</p>
+                        <p className="text-sm text-slate-500">Loading doctor&#39;s orders...</p>
                       </div>
                     </div>
                   ) : doctorsOrders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                       <div className="flex flex-col items-center gap-2 text-center">
                         <Stethoscope className="h-12 w-12 text-slate-300" />
-                        <h3 className="text-lg font-medium text-slate-700">No doctor's orders</h3>
+                        <h3 className="text-lg font-medium text-slate-700">No doctor&#39;s orders</h3>
                         <p className="text-sm text-slate-500">
                           This patient doesn&#39;t have any doctor&#39;s orders yet.
                         </p>
@@ -1203,7 +1203,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
 
                               <div className="space-y-3">
                                 <div>
-                                  <h5 className="text-xs font-medium text-slate-500 mb-1">Doctor's Order</h5>
+                                  <h5 className="text-xs font-medium text-slate-500 mb-1">Doctor&#39;s Order</h5>
                                   <p className="text-sm text-slate-800 p-3 bg-slate-50 rounded-md">
                                     {order.doctors_order}
                                   </p>
