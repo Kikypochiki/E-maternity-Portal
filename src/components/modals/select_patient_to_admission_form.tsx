@@ -43,7 +43,7 @@ const admissionFormSchema = z.object({
   patient_id: z.string(),
   admission_id: z.string(), // Added admission_id to the schema
   admission_type: z.enum(["new", "old"]),
-  referring_personnel: z.string().min(1, "Referring personnel is required"),
+  referring_personnel: z.string().optional(),
   service_classification: z.enum(["PHIC", "NON PHIC"]),
   phic_number: z
     .string()
