@@ -571,7 +571,7 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
     }
   }
 
-  const handleDeleteFile = async (filePath: string, fileName: string) => {
+  const handleDeleteFile = async (filePath: string) => {
     if (!fileToDelete) return
 
     setIsDeletingFile(true)
@@ -1713,7 +1713,7 @@ const handleDownloadFile = async (filePath: string, fileName: string) => {
             if (fileToDelete) {
               const fileToDeleteObject = labFiles.find((file) => file.id === fileToDelete);
               if (fileToDeleteObject) {
-                await handleDeleteFile(`${patient.patient_id}/${fileToDeleteObject.file_name}`, fileToDeleteObject.file_name);
+                await handleDeleteFile(`${patient.patient_id}/${fileToDeleteObject.file_name}`);
               }
             }
           }}
