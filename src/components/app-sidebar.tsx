@@ -12,7 +12,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import Image from "next/image";
-import { title } from "process"
 // This is sample data.
 const data = [
   {

@@ -104,7 +104,6 @@ const CustomCalendar = ({
     "November",
     "December",
   ]
-  const shortMonthNames = monthNames.map((m) => m.substring(0, 3))
 
   // Get days in month
   const getDaysInMonth = (year: number, month: number) => {
@@ -485,6 +484,24 @@ export default function AppointmentsPage() {
       toast.error("An unexpected error occurred")
     }
   }
+  const handleCompleteAppointment = async (appointmentId: string) => {
+    try {
+      const { error } = await supabase.from("Appointments").delete().eq("appointment_id", appointmentId)
+
+      if (error) {
+        console.error("Error completing appointment:", error)
+        toast.error("Failed to complete appointment")
+        return
+      }
+
+      // Remove the appointment from state
+      setAppointments((prev) => prev.filter((apt) => apt.appointment_id !== appointmentId))
+      toast.success("Appointment succesfully completed")
+    } catch (error) {
+      console.error("Error in complete operation:", error)
+      toast.error("An unexpected error occurred")
+    }
+  }
 
   // Get appointments for the selected date
   const getAppointmentsForDate = (selectedDate: Date) => {
@@ -712,7 +729,7 @@ export default function AppointmentsPage() {
           <Tabs defaultValue="calendar" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="calendar">Calendar</TabsTrigger>
-              <TabsTrigger value="today">Today's Appointments</TabsTrigger>
+              <TabsTrigger value="today">Today&apos;s Appointments</TabsTrigger>
               <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
             </TabsList>
 
@@ -878,7 +895,7 @@ export default function AppointmentsPage() {
               ) : (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Today's Appointments</CardTitle>
+                    <CardTitle>Today&apos;s Appointments</CardTitle>
                     <CardDescription>
                       {formatDate(new Date(), "MMMM d, yyyy")} - {todaysAppointments.length} appointments
                     </CardDescription>
@@ -908,7 +925,8 @@ export default function AppointmentsPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50">
+                                <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50"
+                                onClick={() => handleCompleteAppointment(appointment.appointment_id)}>
                                   <CheckCircle className="h-4 w-4 mr-1" />
                                   Complete
                                 </Button>
