@@ -20,6 +20,7 @@ import {
   MoreHorizontal,
 } from "lucide-react"
 import { motion } from "framer-motion"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Dashboard() {
   const router = useRouter()
@@ -49,7 +50,6 @@ export default function Dashboard() {
   const [recentAdmissions, setRecentAdmissions] = useState<Admission[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-
 
   // Initialize Supabase client
   const supabase = createClient()
@@ -174,7 +174,7 @@ export default function Dashboard() {
         (recentAdmissionsData || []).map((admission) => ({
           ...admission,
           Patients: Array.isArray(admission.Patients) ? admission.Patients[0] : admission.Patients,
-        }))
+        })),
       )
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
@@ -263,10 +263,10 @@ export default function Dashboard() {
         <main className="flex-1 p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="space-y-2">
-              <div className="h-8 w-48 bg-slate-200 animate-pulse rounded"></div>
-              <div className="h-4 w-32 bg-slate-200 animate-pulse rounded"></div>
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
             </div>
-            <div className="h-9 w-24 bg-slate-200 animate-pulse rounded"></div>
+            <Skeleton className="h-9 w-24" />
           </div>
 
           {/* Statistics Cards Skeleton */}
@@ -274,24 +274,11 @@ export default function Dashboard() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white rounded-lg shadow-md p-6 space-y-4">
                 <div className="flex justify-between items-center">
-                  <div className="h-4 w-24 bg-slate-200 animate-pulse rounded"></div>
-                  <div className="h-8 w-8 rounded-full bg-slate-200 animate-pulse"></div>
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
                 </div>
-                <div className="h-8 w-16 bg-slate-200 animate-pulse rounded"></div>
-                <div className="h-4 w-32 bg-slate-200 animate-pulse rounded"></div>
-              </div>
-            ))}
-          </div>
-
-          {/* Charts Skeleton */}
-          <div className="grid gap-6 md:grid-cols-2 mb-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 space-y-4">
-                <div className="space-y-2">
-                  <div className="h-5 w-32 bg-slate-200 animate-pulse rounded"></div>
-                  <div className="h-4 w-48 bg-slate-200 animate-pulse rounded"></div>
-                </div>
-                <div className="h-64 w-full bg-slate-200 animate-pulse rounded"></div>
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-4 w-32" />
               </div>
             ))}
           </div>
@@ -301,22 +288,43 @@ export default function Dashboard() {
             {[1, 2].map((i) => (
               <div key={i} className="bg-white rounded-lg shadow-md p-6 space-y-4">
                 <div className="space-y-2">
-                  <div className="h-5 w-32 bg-slate-200 animate-pulse rounded"></div>
-                  <div className="h-4 w-48 bg-slate-200 animate-pulse rounded"></div>
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-4 w-48" />
                 </div>
                 <div className="space-y-4">
                   {[1, 2, 3, 4].map((j) => (
                     <div key={j} className="flex items-center space-x-4">
-                      <div className="h-10 w-10 rounded-full bg-slate-200 animate-pulse"></div>
+                      <Skeleton className="h-10 w-10 rounded-full" />
                       <div className="space-y-2 flex-1">
-                        <div className="h-4 w-3/4 bg-slate-200 animate-pulse rounded"></div>
-                        <div className="h-3 w-1/2 bg-slate-200 animate-pulse rounded"></div>
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Hospital Statistics Skeleton */}
+          <div className="mt-6">
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="p-4 bg-slate-50 rounded-lg space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-8 w-16" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -328,7 +336,7 @@ export default function Dashboard() {
       <main className="flex-1 p-6 md:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-800">Dashboard</h2>
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             <p className="text-muted-foreground">
               Overview - {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             </p>
@@ -359,7 +367,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-slate-800">
-                  {isLoading ? <div className="h-8 w-16 bg-primary/5 animate-pulse rounded"></div> : totalPatients}
+                  {isLoading ? <Skeleton className="h-8 w-16" /> : totalPatients}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <ArrowUpRight className="mr-1 h-3 w-3 text-green-600" />
@@ -379,7 +387,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-slate-800">
-                  {isLoading ? <div className="h-8 w-16 bg-amber-100 animate-pulse rounded"></div> : totalAdmitted}
+                  {isLoading ? <Skeleton className="h-8 w-16" /> : totalAdmitted}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <Clock className="mr-1 h-3 w-3 text-amber-600" />
@@ -399,7 +407,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-slate-800">
-                  {isLoading ? <div className="h-8 w-16 bg-green-100 animate-pulse rounded"></div> : totalDischarged}
+                  {isLoading ? <Skeleton className="h-8 w-16" /> : totalDischarged}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <ArrowDownRight className="mr-1 h-3 w-3 text-green-600" />
@@ -521,7 +529,7 @@ export default function Dashboard() {
                   <div className="mt-2">
                     <span className="text-2xl font-bold">
                       {isLoading ? (
-                        <div className="h-8 w-16 bg-slate-100 animate-pulse rounded"></div>
+                        <Skeleton className="h-8 w-16" />
                       ) : totalAdmitted && totalPatients ? (
                         `${Math.round((totalAdmitted / totalPatients) * 100)}%`
                       ) : (
@@ -539,7 +547,7 @@ export default function Dashboard() {
                   <div className="mt-2">
                     <span className="text-2xl font-bold">
                       {isLoading ? (
-                        <div className="h-8 w-16 bg-slate-100 animate-pulse rounded"></div>
+                        <Skeleton className="h-8 w-16" />
                       ) : totalDischarged && totalPatients ? (
                         `${Math.round((totalDischarged / totalPatients) * 100)}%`
                       ) : (

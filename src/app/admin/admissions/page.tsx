@@ -99,7 +99,7 @@ export default function Admissions() {
           {loading ? (
             <Skeleton className="w-[150px] h-[28px] rounded-full" />
           ) : (
-            <h1 className="text-2xl font-bold">Admissions</h1>
+            <h2 className="text-3xl font-bold tracking-tight">Admissions</h2>
           )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">

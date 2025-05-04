@@ -101,9 +101,9 @@ export default function Patients() {
       <div className="flex flex-row h-4 m-2">
         <div className="flex items-center">
           {loading ? (
-            <Skeleton className="w-[100px] h-[20px] rounded-full" />
+            <Skeleton className="w-[150px] h-[28px] rounded-full" />
           ) : (
-            <h1 className="text-2xl font-bold">Patients</h1>
+            <h2 className="text-3xl font-bold tracking-tight">Patients</h2>
           )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
