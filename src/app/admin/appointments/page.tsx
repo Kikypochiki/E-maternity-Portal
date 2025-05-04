@@ -1,0 +1,817 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { format } from "date-fns"
+import { Calendar } from "@/components/ui/calendar"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Search, CalendarIcon, Clock, User, Plus, X, CheckCircle } from "lucide-react"
+import { toast } from "sonner"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+type Patient = {
+  patient_id: string
+  patient_id_provided: string
+  first_name: string
+  last_name: string
+  middle_initial?: string
+  date_of_birth?: string
+}
+
+// Update the Appointment type to only include the necessary fields
+type Appointment = {
+  appointment_id: string
+  patient_id: string
+  date_of_appointment: string
+  time_of_appointment?: string
+}
+
+export default function AppointmentsPage() {
+  const supabase = createClient()
+  const [date, setDate] = useState<Date>(new Date())
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [isSelectPatientOpen, setIsSelectPatientOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [appointmentTime, setAppointmentTime] = useState<string>("09:00")
+  const [appointmentsByDate, setAppointmentsByDate] = useState<Record<string, Appointment[]>>({})
+  const [selectedTab, setSelectedTab] = useState("calendar")
+
+  // Fetch patients and appointments on component mount
+  useEffect(() => {
+    fetchPatients()
+    fetchAppointments()
+    cleanupExpiredAppointments() // Add this line to clean up expired appointments
+  }, [])
+
+  // Filter patients based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredPatients(patients)
+    } else {
+      const query = searchQuery.toLowerCase()
+      const filtered = patients.filter(
+        (patient) =>
+          patient.first_name.toLowerCase().includes(query) ||
+          patient.last_name.toLowerCase().includes(query) ||
+          patient.patient_id_provided.toLowerCase().includes(query),
+      )
+      setFilteredPatients(filtered)
+    }
+  }, [searchQuery, patients])
+
+  // Group appointments by date
+  useEffect(() => {
+    const groupedAppointments: Record<string, Appointment[]> = {}
+
+    appointments.forEach((appointment) => {
+      const dateKey = appointment.date_of_appointment.split("T")[0]
+      if (!groupedAppointments[dateKey]) {
+        groupedAppointments[dateKey] = []
+      }
+      groupedAppointments[dateKey].push(appointment)
+    })
+
+    setAppointmentsByDate(groupedAppointments)
+  }, [appointments])
+
+  // Fetch all patients from the database
+  const fetchPatients = async () => {
+    try {
+      setIsLoading(true)
+      const { data: patientData, error } = await supabase.from("Patients").select("*")
+
+      if (error) {
+        console.error("Error fetching patients:", error)
+        return
+      }
+
+      if (patientData) {
+        const formattedData = patientData.map((patient) => ({
+          ...patient,
+          patient_id: patient.patient_id || "N/A",
+          patient_id_provided: patient.patient_id_provided || "N/A",
+          first_name: patient.first_name || "N/A",
+          last_name: patient.last_name || "N/A",
+          middle_initial: patient.middle_initial || "",
+        }))
+        setPatients(formattedData)
+        setFilteredPatients(formattedData)
+      }
+    } catch (error) {
+      console.error("Error in fetch operation:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Simplify the fetchAppointments function to only fetch appointment data
+  const fetchAppointments = async () => {
+    try {
+      setIsLoading(true)
+      const { data, error } = await supabase
+        .from("Appointments")
+        .select("appointment_id, patient_id, date_of_appointment, time_of_appointment")
+
+      if (error) {
+        console.error("Error fetching appointments:", error)
+        return
+      }
+
+      if (data) {
+        setAppointments(data)
+      }
+    } catch (error) {
+      console.error("Error in fetch operation:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Function to clean up expired appointments
+  const cleanupExpiredAppointments = async () => {
+    try {
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      const formattedDate = format(yesterday, "yyyy-MM-dd")
+
+      // Delete appointments that are older than yesterday
+      const { error } = await supabase.from("Appointments").delete().lte("date_of_appointment", formattedDate)
+
+      if (error) {
+        console.error("Error cleaning up expired appointments:", error)
+        return
+      }
+
+      // Refresh appointments after cleanup
+      fetchAppointments()
+    } catch (error) {
+      console.error("Error in cleanup operation:", error)
+    }
+  }
+
+  // Handle patient selection
+  const handlePatientSelect = (patient: Patient) => {
+    setSelectedPatient(patient)
+    setIsSelectPatientOpen(false)
+  }
+
+  // Update the handleCreateAppointment function to only include the necessary fields
+  const handleCreateAppointment = async () => {
+    if (!selectedPatient) {
+      toast.error("Please select a patient")
+      return
+    }
+
+    // Check if the selected date is in the past
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (date < today) {
+      toast.error("Cannot schedule appointments in the past")
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+
+      // Format the date for database storage
+      const formattedDate = format(date, "yyyy-MM-dd")
+
+      // Insert appointment data into Appointments table without specifying appointment_id
+      const { data, error } = await supabase
+        .from("Appointments")
+        .insert([
+          {
+            patient_id: selectedPatient.patient_id,
+            date_of_appointment: formattedDate,
+            time_of_appointment: appointmentTime,
+          },
+        ])
+        .select()
+
+      if (error) {
+        console.error("Error creating appointment:", error)
+        toast.error("Failed to create appointment")
+        return
+      }
+
+      // Add the new appointment to the state using the ID generated by Supabase
+      if (data && data.length > 0) {
+        const newAppointment = data[0]
+        setAppointments((prev) => [...prev, newAppointment])
+
+        // Show success toast
+        toast.success("Appointment scheduled successfully!")
+
+        // Reset form
+        setSelectedPatient(null)
+        setAppointmentTime("09:00")
+      }
+    } catch (error) {
+      console.error("Error in appointment creation:", error)
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Cancel an appointment
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      const { error } = await supabase.from("Appointments").delete().eq("appointment_id", appointmentId)
+
+      if (error) {
+        console.error("Error canceling appointment:", error)
+        toast.error("Failed to cancel appointment")
+        return
+      }
+
+      // Remove the appointment from state
+      setAppointments((prev) => prev.filter((apt) => apt.appointment_id !== appointmentId))
+      toast.success("Appointment canceled successfully")
+    } catch (error) {
+      console.error("Error in cancel operation:", error)
+      toast.error("An unexpected error occurred")
+    }
+  }
+  const handleCompleteAppointment = async (appointmentId: string) => {
+    try {
+      const { error } = await supabase.from("Appointments").delete().eq("appointment_id", appointmentId)
+
+      if (error) {
+        console.error("Error completing appointment:", error)
+        toast.error("Failed to complete appointment")
+        return
+      }
+
+      // Remove the appointment from state
+      setAppointments((prev) => prev.filter((apt) => apt.appointment_id !== appointmentId))
+      toast.success("Appointment successfully completed")
+    } catch (error) {
+      console.error("Error in completing operation:", error)
+      toast.error("An unexpected error occurred")
+    }
+  }
+
+  // Get appointments for the selected date
+  const getAppointmentsForDate = (selectedDate: Date) => {
+    const dateKey = format(selectedDate, "yyyy-MM-dd")
+    return appointmentsByDate[dateKey] || []
+  }
+
+  // Check if a date has appointments
+  const hasAppointments = (day: Date) => {
+    const dateKey = format(day, "yyyy-MM-dd")
+    return appointmentsByDate[dateKey] && appointmentsByDate[dateKey].length > 0
+  }
+
+  // Get today's appointments
+  const todaysAppointments = getAppointmentsForDate(new Date())
+
+  // Get upcoming appointments (excluding today)
+  const upcomingAppointments = appointments
+    .filter((appointment) => {
+      const appointmentDate = new Date(appointment.date_of_appointment)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      return appointmentDate > today
+    })
+    .sort((a, b) => {
+      return new Date(a.date_of_appointment).getTime() - new Date(b.date_of_appointment).getTime()
+    })
+
+  // Helper function to get patient information by patient_id
+  const getPatientById = (patientId: string) => {
+    return patients.find((patient) => patient.patient_id === patientId)
+  }
+
+  // Render loading skeleton for calendar view
+  const renderCalendarSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <Card className="col-span-1">
+        <CardHeader className="pb-2">
+          <Skeleton className="h-5 w-24 mb-1" />
+          <Skeleton className="h-3 w-36" />
+        </CardHeader>
+        <CardContent className="p-2">
+          <div className="space-y-1">
+            <div className="flex justify-between mb-1">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-4" />
+            </div>
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Skeleton key={i} className="h-3 w-full" />
+              ))}
+            </div>
+            {Array.from({ length: 6 }).map((_, weekIndex) => (
+              <div key={weekIndex} className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 7 }).map((_, dayIndex) => (
+                  <Skeleton key={dayIndex} className="h-7 w-7 rounded-md mx-auto" />
+                ))}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="col-span-1 md:col-span-2">
+        <CardHeader>
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-4 w-32" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-4 border rounded-md">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div>
+                    <Skeleton className="h-5 w-32 mb-2" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-9 w-20" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Skeleton className="h-9 w-32" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-36" />
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+
+  // Render loading skeleton for appointment lists
+  const renderAppointmentListSkeleton = () => (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-48 mb-2" />
+        <Skeleton className="h-4 w-32" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between p-4 border rounded-md">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div>
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  return (
+    <div className="container mx-auto py-6">
+      <div className="flex flex-col space-y-6">
+        <div className="flex items-center justify-between">
+          {isLoading ? (
+            <>
+              <div>
+                <Skeleton className="h-8 w-48 mb-2" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+              <Skeleton className="h-10 w-32" />
+            </>
+          ) : (
+            <>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Appointment</h1>
+                <p className="text-muted-foreground">Schedule and manage patient check-up appointments</p>
+              </div>
+              <Dialog open={isSelectPatientOpen} onOpenChange={setIsSelectPatientOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2">
+                    <Plus size={16} />
+                    <span>New Appointment</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold">Select Patient</DialogTitle>
+                    <DialogDescription>Search and select a patient to schedule an appointment.</DialogDescription>
+                  </DialogHeader>
+
+                  {/* Search input */}
+                  <div className="relative mb-4">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search patients by name or ID..."
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Patient list */}
+                  <ScrollArea className="flex-grow">
+                    <div className="flex flex-col gap-2 pr-4">
+                      {isLoading ? (
+                        // Skeleton loading state
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <div key={index} className="p-4 border rounded-md">
+                            <div className="flex flex-col gap-2">
+                              <Skeleton className="h-5 w-3/4" />
+                              <Skeleton className="h-4 w-1/2" />
+                            </div>
+                          </div>
+                        ))
+                      ) : filteredPatients.length > 0 ? (
+                        filteredPatients.map((patient) => (
+                          <div
+                            key={patient.patient_id}
+                            className="flex flex-row items-center justify-between p-4 border rounded-md hover:bg-muted cursor-pointer"
+                            onClick={() => handlePatientSelect(patient)}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">{`${patient.first_name} ${patient.middle_initial ? patient.middle_initial + " " : ""}${patient.last_name}`}</span>
+                              <span className="text-sm text-muted-foreground">{`Patient ID: ${patient.patient_id_provided}`}</span>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              Select
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground">
+                          {searchQuery ? "No patients found matching your search" : "No patients available"}
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+
+                  <DialogFooter className="mt-4">
+                    <Button variant="outline" onClick={() => setIsSelectPatientOpen(false)}>
+                      Cancel
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
+        </div>
+
+        {isLoading ? (
+          <div className="w-full">
+            <Skeleton className="h-10 w-full mb-6" />
+            {renderCalendarSkeleton()}
+          </div>
+        ) : (
+          <Tabs defaultValue="calendar" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="calendar">Calendar</TabsTrigger>
+              <TabsTrigger value="today">Today&apos;s Appointments</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="calendar" className="mt-6">
+              {isLoading ? (
+                renderCalendarSkeleton()
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="col-span-1">
+                    <CardHeader className="pb-2">
+                      <CardTitle>Select Date</CardTitle>
+                      <CardDescription className="text-sm">Choose a date for the appointment</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-2">
+                      <div className="flex justify-center">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={(newDate) => newDate && setDate(newDate)}
+                          className="rounded-md border"
+                          modifiers={{
+                            hasAppointments: (day) => hasAppointments(day),
+                          }}
+                          modifiersStyles={{
+                            hasAppointments: {
+                              fontWeight: "bold",
+                              backgroundColor: "hsl(var(--primary) / 0.1)",
+                              color: "hsl(var(--primary))",
+                              borderRadius: "0.25rem",
+                            },
+                          }}
+                          disabled={(date) => {
+                            const today = new Date()
+                            today.setHours(0, 0, 0, 0)
+                            return date < today
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="col-span-1 md:col-span-2">
+                    <CardHeader>
+                      <CardTitle>{format(date, "MMMM d, yyyy")} - Appointments</CardTitle>
+                      <CardDescription>{getAppointmentsForDate(date).length} appointments scheduled</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {getAppointmentsForDate(date).length > 0 ? (
+                        <div className="space-y-4">
+                          {getAppointmentsForDate(date).map((appointment) => {
+                            const patient = getPatientById(appointment.patient_id)
+                            return (
+                              <div
+                                key={appointment.appointment_id}
+                                className="flex items-center justify-between p-4 border rounded-md"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                    <User className="h-5 w-5" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">
+                                      {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{appointment.time_of_appointment || "No time specified"}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-destructive"
+                                  onClick={() => handleCancelAppointment(appointment.appointment_id)}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                          <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
+                          <p className="text-muted-foreground">No appointments scheduled for this date</p>
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {selectedPatient ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-primary/10 text-primary">
+                              {selectedPatient.first_name} {selectedPatient.last_name}
+                            </Badge>
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedPatient(null)}>
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          "No patient selected"
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" size="sm" className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              {appointmentTime || "Select time"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="grid gap-4">
+                              <div className="space-y-2">
+                                <h4 className="font-medium leading-none">Appointment Time</h4>
+                                <p className="text-sm text-muted-foreground">Set the time for this appointment</p>
+                              </div>
+                              <div className="grid gap-2">
+                                <Select value={appointmentTime} onValueChange={setAppointmentTime}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select time" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 12 }).flatMap((_, i) => {
+                                      const hour = i + 8 // Start from 8 AM
+                                      return [
+                                        <SelectItem key={`${hour}:00`} value={`${hour.toString().padStart(2, "0")}:00`}>
+                                          {`${hour}:00 ${hour < 12 ? "AM" : hour === 12 ? "PM" : "PM"}`}
+                                        </SelectItem>,
+                                        <SelectItem key={`${hour}:30`} value={`${hour.toString().padStart(2, "0")}:30`}>
+                                          {`${hour}:30 ${hour < 12 ? "AM" : hour === 12 ? "PM" : "PM"}`}
+                                        </SelectItem>,
+                                      ]
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        <Button onClick={handleCreateAppointment} disabled={!selectedPatient || isSubmitting}>
+                          {isSubmitting ? (
+                            <>
+                              <span className="mr-2">
+                                <svg
+                                  className="animate-spin h-4 w-4 text-white"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
+                                </svg>
+                              </span>
+                              Scheduling...
+                            </>
+                          ) : (
+                            "Schedule Appointment"
+                          )}
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="today" className="mt-6">
+              {isLoading ? (
+                renderAppointmentListSkeleton()
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Today&apos;s Appointments</CardTitle>
+                    <CardDescription>
+                      {format(new Date(), "MMMM d, yyyy")} - {todaysAppointments.length} appointments
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {todaysAppointments.length > 0 ? (
+                      <div className="space-y-4">
+                        {todaysAppointments.map((appointment) => {
+                          const patient = getPatientById(appointment.patient_id)
+                          return (
+                            <div
+                              key={appointment.appointment_id}
+                              className="flex items-center justify-between p-4 border rounded-md"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                  <User className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
+                                  </p>
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Clock className="h-3 w-3" />
+                                    <span>{appointment.time_of_appointment || "No time specified"}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50"
+                                onClick={() => handleCompleteAppointment(appointment.appointment_id)}>
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Complete
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-destructive"
+                                  onClick={() => handleCancelAppointment(appointment.appointment_id)}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
+                        <p className="text-muted-foreground">No appointments scheduled for today</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="upcoming" className="mt-6">
+              {isLoading ? (
+                renderAppointmentListSkeleton()
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Upcoming Appointments</CardTitle>
+                    <CardDescription>Next {upcomingAppointments.length} scheduled appointments</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {upcomingAppointments.length > 0 ? (
+                      <div className="space-y-4">
+                        {upcomingAppointments.map((appointment) => {
+                          const patient = getPatientById(appointment.patient_id)
+                          return (
+                            <div
+                              key={appointment.appointment_id}
+                              className="flex items-center justify-between p-4 border rounded-md"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                  <User className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
+                                  </p>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-1">
+                                      <CalendarIcon className="h-3 w-3" />
+                                      <span>{format(new Date(appointment.date_of_appointment), "MMM d, yyyy")}</span>
+                                    </div>
+                                    <div className="hidden sm:block text-muted-foreground">•</div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{appointment.time_of_appointment || "No time specified"}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-destructive"
+                                onClick={() => handleCancelAppointment(appointment.appointment_id)}
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Cancel
+                              </Button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
+                        <p className="text-muted-foreground">No upcoming appointments scheduled</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
+    </div>
+  )
+}

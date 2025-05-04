@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, LayoutDashboard, Inbox, User, Settings, CircleHelp, Users, Hospital} from "lucide-react"
+import { Bell, LayoutDashboard, Inbox, User, Settings, CircleHelp, Users, Hospital, Stethoscope} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import {
@@ -12,6 +12,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import Image from "next/image";
+import { title } from "process"
 // This is sample data.
 const data = [
   {
@@ -28,6 +29,11 @@ const data = [
     title: "Admissions",
     url: "/admin/admissions",
     icon: Hospital,
+  },
+  {
+    title: "Appointments",
+    url: "/admin/appointments",
+    icon: Stethoscope,
   },
   {
     title: "Notifications",
