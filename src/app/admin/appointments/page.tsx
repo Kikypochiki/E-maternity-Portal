@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,10 +18,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Search, CalendarIcon, Clock, User, Plus, X, CheckCircle } from "lucide-react"
+import { Search, CalendarIcon, Clock, User, Plus, X, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 
 type Patient = {
   patient_id: string
@@ -40,6 +39,238 @@ type Appointment = {
   patient_id: string
   date_of_appointment: string
   time_of_appointment?: string
+}
+
+// Fix the formatDate function to properly handle month formatting
+const formatDate = (date: Date, format: string): string => {
+  const day = date.getDate().toString().padStart(2, "0")
+  const month = (date.getMonth() + 1).toString().padStart(2, "0")
+  const year = date.getFullYear()
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
+  const shortMonthNames = monthNames.map((m) => m.substring(0, 3))
+
+  // Create a new string with replacements
+  let result = format
+
+  // Order matters - replace longer patterns first
+  result = result.replace("MMMM", monthNames[date.getMonth()])
+  result = result.replace("MMM", shortMonthNames[date.getMonth()])
+  result = result.replace("MM", month)
+  result = result.replace("yyyy", year.toString())
+  result = result.replace("dd", day)
+  result = result.replace("d", date.getDate().toString())
+
+  return result
+}
+
+// Custom Calendar Component
+const CustomCalendar = ({
+  value,
+  onChange,
+  hasAppointments,
+  disablePastDates = true,
+}: {
+  value: Date
+  onChange: (date: Date) => void
+  hasAppointments?: (date: Date) => boolean
+  disablePastDates?: boolean
+}) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date(value.getFullYear(), value.getMonth(), 1))
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
+  const shortMonthNames = monthNames.map((m) => m.substring(0, 3))
+
+  // Get days in month
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate()
+  }
+
+  // Get day of week for first day of month (0 = Sunday, 6 = Saturday)
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    return new Date(year, month, 1).getDay()
+  }
+
+  // Generate calendar days
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+
+    const daysInMonth = getDaysInMonth(year, month)
+    const firstDayOfMonth = getFirstDayOfMonth(year, month)
+
+    // Previous month days to display
+    const prevMonthDays = []
+    const prevMonth = month === 0 ? 11 : month - 1
+    const prevMonthYear = month === 0 ? year - 1 : year
+    const daysInPrevMonth = getDaysInMonth(prevMonthYear, prevMonth)
+
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      prevMonthDays.push({
+        date: new Date(prevMonthYear, prevMonth, daysInPrevMonth - firstDayOfMonth + i + 1),
+        isCurrentMonth: false,
+        isPast: false,
+      })
+    }
+
+    // Current month days
+    const currentMonthDays = []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const date = new Date(year, month, i)
+      currentMonthDays.push({
+        date,
+        isCurrentMonth: true,
+        isPast: disablePastDates && date < today,
+      })
+    }
+
+    // Next month days to display
+    const nextMonthDays = []
+    const totalDaysDisplayed = prevMonthDays.length + currentMonthDays.length
+    const daysToAdd = 42 - totalDaysDisplayed // 6 rows of 7 days
+
+    const nextMonth = month === 11 ? 0 : month + 1
+    const nextMonthYear = month === 11 ? year + 1 : year
+
+    for (let i = 1; i <= daysToAdd; i++) {
+      nextMonthDays.push({
+        date: new Date(nextMonthYear, nextMonth, i),
+        isCurrentMonth: false,
+        isPast: false,
+      })
+    }
+
+    return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays]
+  }
+
+  // Navigate to previous month
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+  }
+
+  // Navigate to next month
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+  }
+
+  // Check if a date is the selected date
+  const isSelectedDate = (date: Date) => {
+    return (
+      date.getDate() === value.getDate() &&
+      date.getMonth() === value.getMonth() &&
+      date.getFullYear() === value.getFullYear()
+    )
+  }
+
+  // Check if a date is today
+  const isToday = (date: Date) => {
+    const today = new Date()
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    )
+  }
+
+  const days = generateCalendarDays()
+  const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+
+  return (
+    <div className="p-3 border rounded-md">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-medium">
+          {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+        </h2>
+        <div className="flex space-x-1">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+            onClick={prevMonth}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Previous month</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+            onClick={nextMonth}
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Next month</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {weekDays.map((day) => (
+          <div key={day} className="text-center text-sm text-muted-foreground">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {days.map((day, index) => {
+          const isSelected = isSelectedDate(day.date)
+          const isTodayDate = isToday(day.date)
+          const hasAppts = hasAppointments ? hasAppointments(day.date) : false
+
+          return (
+            <div
+              key={index}
+              className={cn(
+                "h-9 w-9 p-0 font-normal text-center flex items-center justify-center rounded-md",
+                !day.isCurrentMonth && "text-muted-foreground opacity-50",
+                day.isPast && "text-muted-foreground opacity-50",
+                isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                isTodayDate && !isSelected && "bg-accent text-accent-foreground",
+                hasAppts && !isSelected && "font-bold bg-primary/10 text-primary",
+                !day.isPast && !isSelected && "hover:bg-accent hover:text-accent-foreground",
+                "cursor-pointer",
+              )}
+              onClick={() => {
+                if (!day.isPast) {
+                  onChange(day.date)
+                }
+              }}
+            >
+              {day.date.getDate()}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default function AppointmentsPage() {
@@ -153,7 +384,7 @@ export default function AppointmentsPage() {
     try {
       const yesterday = new Date()
       yesterday.setDate(yesterday.getDate() - 1)
-      const formattedDate = format(yesterday, "yyyy-MM-dd")
+      const formattedDate = formatDate(yesterday, "yyyy-MM-dd")
 
       // Delete appointments that are older than yesterday
       const { error } = await supabase.from("Appointments").delete().lte("date_of_appointment", formattedDate)
@@ -195,7 +426,7 @@ export default function AppointmentsPage() {
       setIsSubmitting(true)
 
       // Format the date for database storage
-      const formattedDate = format(date, "yyyy-MM-dd")
+      const formattedDate = formatDate(date, "yyyy-MM-dd")
 
       // Insert appointment data into Appointments table without specifying appointment_id
       const { data, error } = await supabase
@@ -254,34 +485,16 @@ export default function AppointmentsPage() {
       toast.error("An unexpected error occurred")
     }
   }
-  const handleCompleteAppointment = async (appointmentId: string) => {
-    try {
-      const { error } = await supabase.from("Appointments").delete().eq("appointment_id", appointmentId)
-
-      if (error) {
-        console.error("Error completing appointment:", error)
-        toast.error("Failed to complete appointment")
-        return
-      }
-
-      // Remove the appointment from state
-      setAppointments((prev) => prev.filter((apt) => apt.appointment_id !== appointmentId))
-      toast.success("Appointment successfully completed")
-    } catch (error) {
-      console.error("Error in completing operation:", error)
-      toast.error("An unexpected error occurred")
-    }
-  }
 
   // Get appointments for the selected date
   const getAppointmentsForDate = (selectedDate: Date) => {
-    const dateKey = format(selectedDate, "yyyy-MM-dd")
+    const dateKey = formatDate(selectedDate, "yyyy-MM-dd")
     return appointmentsByDate[dateKey] || []
   }
 
   // Check if a date has appointments
   const hasAppointments = (day: Date) => {
-    const dateKey = format(day, "yyyy-MM-dd")
+    const dateKey = formatDate(day, "yyyy-MM-dd")
     return appointmentsByDate[dateKey] && appointmentsByDate[dateKey].length > 0
   }
 
@@ -499,7 +712,7 @@ export default function AppointmentsPage() {
           <Tabs defaultValue="calendar" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="calendar">Calendar</TabsTrigger>
-              <TabsTrigger value="today">Today&apos;s Appointments</TabsTrigger>
+              <TabsTrigger value="today">Today's Appointments</TabsTrigger>
               <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
             </TabsList>
 
@@ -515,35 +728,14 @@ export default function AppointmentsPage() {
                     </CardHeader>
                     <CardContent className="p-2">
                       <div className="flex justify-center">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={(newDate) => newDate && setDate(newDate)}
-                          className="rounded-md border"
-                          modifiers={{
-                            hasAppointments: (day) => hasAppointments(day),
-                          }}
-                          modifiersStyles={{
-                            hasAppointments: {
-                              fontWeight: "bold",
-                              backgroundColor: "hsl(var(--primary) / 0.1)",
-                              color: "hsl(var(--primary))",
-                              borderRadius: "0.25rem",
-                            },
-                          }}
-                          disabled={(date) => {
-                            const today = new Date()
-                            today.setHours(0, 0, 0, 0)
-                            return date < today
-                          }}
-                        />
+                        <CustomCalendar value={date} onChange={setDate} hasAppointments={hasAppointments} />
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="col-span-1 md:col-span-2">
                     <CardHeader>
-                      <CardTitle>{format(date, "MMMM d, yyyy")} - Appointments</CardTitle>
+                      <CardTitle>{formatDate(date, "MMMM d, yyyy")} - Appointments</CardTitle>
                       <CardDescription>{getAppointmentsForDate(date).length} appointments scheduled</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -573,7 +765,7 @@ export default function AppointmentsPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-destructive"
+                                  className="text-destructive hover:bg-destructive/10"
                                   onClick={() => handleCancelAppointment(appointment.appointment_id)}
                                 >
                                   <X className="h-4 w-4 mr-1" />
@@ -686,9 +878,9 @@ export default function AppointmentsPage() {
               ) : (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Today&apos;s Appointments</CardTitle>
+                    <CardTitle>Today's Appointments</CardTitle>
                     <CardDescription>
-                      {format(new Date(), "MMMM d, yyyy")} - {todaysAppointments.length} appointments
+                      {formatDate(new Date(), "MMMM d, yyyy")} - {todaysAppointments.length} appointments
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -716,15 +908,14 @@ export default function AppointmentsPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleCompleteAppointment(appointment.appointment_id)}>
+                                <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50">
                                   <CheckCircle className="h-4 w-4 mr-1" />
                                   Complete
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-destructive"
+                                  className="text-destructive hover:bg-destructive/10"
                                   onClick={() => handleCancelAppointment(appointment.appointment_id)}
                                 >
                                   <X className="h-4 w-4 mr-1" />
@@ -776,7 +967,9 @@ export default function AppointmentsPage() {
                                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-muted-foreground">
                                     <div className="flex items-center gap-1">
                                       <CalendarIcon className="h-3 w-3" />
-                                      <span>{format(new Date(appointment.date_of_appointment), "MMM d, yyyy")}</span>
+                                      <span>
+                                        {formatDate(new Date(appointment.date_of_appointment), "MMM d, yyyy")}
+                                      </span>
                                     </div>
                                     <div className="hidden sm:block text-muted-foreground">•</div>
                                     <div className="flex items-center gap-1">
@@ -789,7 +982,7 @@ export default function AppointmentsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="text-destructive"
+                                className="text-destructive hover:bg-destructive/10"
                                 onClick={() => handleCancelAppointment(appointment.appointment_id)}
                               >
                                 <X className="h-4 w-4 mr-1" />
