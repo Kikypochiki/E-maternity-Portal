@@ -324,7 +324,7 @@ export function NotesAttachmentForm({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[650px] max-h-[80vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>Notes</DialogTitle>
+            <DialogTitle>Nurse's/RM Notes</DialogTitle>
             <DialogDescription>Manage notes for {patientName}</DialogDescription>
           </DialogHeader>
 

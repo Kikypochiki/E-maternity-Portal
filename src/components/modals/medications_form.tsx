@@ -542,7 +542,6 @@ export function MedicationsForm({
                               <FormControl>
                                 <Input
                                   id="time-to-take"
-                                  type="time"
                                   {...field}
                                   disabled={isPatientDischarged}
                                 />
