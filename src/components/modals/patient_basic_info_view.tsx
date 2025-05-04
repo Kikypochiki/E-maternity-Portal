@@ -571,13 +571,13 @@ export function PatientBasicInfoView({ trigger, patient, onEdit }: PatientBasicI
     }
   }
 
-  const handleDeleteFile = async () => {
+  const handleDeleteFile = async (filePath: string, fileName: string) => {
     if (!fileToDelete) return
 
     setIsDeletingFile(true)
     try {
       // First delete the file from storage
-      const { error: storageError } = await supabase.storage.from("lab.results").remove([fileToDelete])
+      const { error: storageError } = await supabase.storage.from("lab.results").remove([filePath])
 
       if (storageError) {
         console.error("Error deleting file from storage:", storageError)
@@ -1709,7 +1709,14 @@ const handleDownloadFile = async (filePath: string, fileName: string) => {
             setDeleteFileDialogOpen(false)
             setFileToDelete(null)
           }}
-          onConfirm={handleDeleteFile}
+          onConfirm={async () => {
+            if (fileToDelete) {
+              const fileToDeleteObject = labFiles.find((file) => file.id === fileToDelete);
+              if (fileToDeleteObject) {
+                await handleDeleteFile(`${patient.patient_id}/${fileToDeleteObject.file_name}`, fileToDeleteObject.file_name);
+              }
+            }
+          }}
           title="Delete Lab File"
           description="Are you sure you want to delete this lab file? This action cannot be undone."
           isDeleting={isDeletingFile}
