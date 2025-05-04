@@ -26,13 +26,30 @@ export default function Dashboard() {
   const [totalPatients, setTotalPatients] = useState<number | null>(null)
   const [totalAdmitted, setTotalAdmitted] = useState<number | null>(null)
   const [totalDischarged, setTotalDischarged] = useState<number | null>(null)
-  const [recentPatients, setRecentPatients] = useState<any[]>([])
-  const [recentAdmissions, setRecentAdmissions] = useState<any[]>([])
+  interface Patient {
+    patient_id: string
+    first_name: string
+    last_name: string
+    date_of_birth: string
+    created_at: string
+  }
+
+  interface Admission {
+    admission_id: string
+    patient_id: string
+    created_at: string
+    admission_type: string
+    Patients?: {
+      first_name: string
+      last_name: string
+    }
+  }
+
+  const [recentPatients, setRecentPatients] = useState<Patient[]>([])
+  const [recentAdmissions, setRecentAdmissions] = useState<Admission[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
-  const [, setAdmissionData] = useState<any[]>([])
-  const [, setPatientTypeData] = useState<any[]>([])
 
   // Initialize Supabase client
   const supabase = createClient()
@@ -72,7 +89,7 @@ export default function Dashboard() {
       // Fetch recent admissions
       const { data: recentAdmissionsData, error: recentAdmissionsError } = await supabase
         .from("Admissions")
-        .select("admission_id, patient_id, admission_type, created_at, Patients(first_name, last_name)")
+        .select("admission_id, patient_id, admission_type, created_at, Patients:patient_id(first_name, last_name)")
         .order("created_at", { ascending: false })
         .limit(4)
 
@@ -132,14 +149,6 @@ export default function Dashboard() {
       })
 
       // Format data for chart
-      const formattedAdmissionData = last7Days.map((fullDate) => {
-        const date = new Date(fullDate)
-        return {
-          date: date.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
-          admissions: admissionsByDate[fullDate],
-          discharges: dischargesByDate[fullDate],
-        }
-      })
 
       // Fetch patient types data
       const { data: patientTypesData, error: patientTypesError } = await supabase
@@ -156,18 +165,17 @@ export default function Dashboard() {
       })
 
       // Format data for chart
-      const formattedPatientTypeData = Object.entries(typeCount).map(([type, count]) => ({
-        type,
-        count,
-      }))
 
       setTotalPatients(patientsCount)
       setTotalAdmitted(admittedCount)
       setTotalDischarged(dischargedCount)
       setRecentPatients(recentPatientsData || [])
-      setRecentAdmissions(recentAdmissionsData || [])
-      setAdmissionData(formattedAdmissionData)
-      setPatientTypeData(formattedPatientTypeData)
+      setRecentAdmissions(
+        (recentAdmissionsData || []).map((admission) => ({
+          ...admission,
+          Patients: Array.isArray(admission.Patients) ? admission.Patients[0] : admission.Patients,
+        }))
+      )
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
     } finally {
