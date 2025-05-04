@@ -17,7 +17,6 @@ import {
   Activity,
   User,
   FileText,
-  MoreHorizontal,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -371,7 +370,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <ArrowUpRight className="mr-1 h-3 w-3 text-green-600" />
-                  <span className="text-green-600 font-medium">Active</span> patient records in the system
+                  <span className="text-green-600 font-medium">Active patients in the system</span> 
                 </p>
               </CardContent>
             </Card>
@@ -391,7 +390,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <Clock className="mr-1 h-3 w-3 text-amber-600" />
-                  <span className="text-amber-600 font-medium">Current</span> patients under care
+                  <span className="text-amber-600 font-medium">Current patients under care</span>
                 </p>
               </CardContent>
             </Card>
@@ -411,7 +410,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <ArrowDownRight className="mr-1 h-3 w-3 text-green-600" />
-                  <span className="text-green-600 font-medium">Completed</span> patient treatments
+                  <span className="text-green-600 font-medium">Completed patient treatments</span>
                 </p>
               </CardContent>
             </Card>
@@ -446,10 +445,7 @@ export default function Dashboard() {
                               year: "numeric",
                             })}
                           </p>
-                        </div>
-                        <Button variant="ghost" size="icon" className="ml-auto">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                        </div>  
                       </div>
                     ))}
                   </div>
@@ -495,9 +491,6 @@ export default function Dashboard() {
                             })}
                           </p>
                         </div>
-                        <Button variant="ghost" size="icon" className="ml-auto">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
                       </div>
                     ))}
                   </div>
