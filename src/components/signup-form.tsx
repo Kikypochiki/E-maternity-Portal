@@ -28,9 +28,9 @@ const serviceSupabase = createClient(
 
 async function patientSignUp(email: string, password: string, patientId: string) {
   const { data: patientData, error: patientError } = await serviceSupabase
-    .from("patient_basic_info")
-    .select("patient_id")
-    .eq("patient_id", patientId)
+    .from("Patients")
+    .select("patient_id_provided")
+    .eq("patient_id_provided", patientId)
     .single();
 
   if (patientError || !patientData) {
@@ -61,12 +61,12 @@ async function patientSignUp(email: string, password: string, patientId: string)
   if (data.user) {
     // Update the patient_basic_info table with the new user_id
     const { error: updateError } = await serviceSupabase
-      .from("patient_basic_info")
+      .from("Patients")
       .update({ user_id: data.user.id })
-      .eq("patient_id", patientId);
+      .eq("patient_id_provided", patientId);
 
     if (updateError) {
-      console.error("Failed to update patient_basic_info with user_id:", updateError.message);
+      console.error("Failed to update Patients with user_id:", updateError.message);
       toast.error("Failed to link account. Please contact support.");
     } else {
       console.log("Patient info updated successfully with user_id.");

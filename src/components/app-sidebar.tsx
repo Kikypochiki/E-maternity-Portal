@@ -36,7 +36,7 @@ const data = [
   },
   {
     title: "Notifications",
-    url: "#",
+    url: "/admin/notifications",
     icon: Bell,
   },
   {

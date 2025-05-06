@@ -23,6 +23,8 @@ import { toast } from "sonner"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import NotifyAdmin from "@/components/modals/notify-admin"
+import NotifyPatient from "@/components/modals/notify-patient"
 
 type Patient = {
   patient_id: string
@@ -177,7 +179,7 @@ const CustomCalendar = ({
 
   // Navigate to next month
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
   }
 
   // Check if a date is the selected date
@@ -400,6 +402,10 @@ export default function AppointmentsPage() {
     }
   }
 
+  // Add the following function after the cleanupExpiredAppointments function and before the handlePatientSelect function:
+
+  // Function to check and send notifications for upcoming appointments
+
   // Handle patient selection
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient)
@@ -450,8 +456,14 @@ export default function AppointmentsPage() {
         const newAppointment = data[0]
         setAppointments((prev) => [...prev, newAppointment])
 
-        // Show success toast
-        toast.success("Appointment scheduled successfully!")
+        // Send notification about new appointment
+        const notificationContent = `NEW APPOINTMENT: ${selectedPatient.first_name} ${selectedPatient.last_name} has been scheduled for ${formatDate(date, "MMM d, yyyy")} at ${formatTime(appointmentTime)}.`
+        NotifyAdmin({ notificationContent })
+        NotifyPatient({
+          patient_id: selectedPatient.patient_id,
+          notificationContent: `You have a new appointment scheduled for ${formatDate(date, "MMM d, yyyy")} at ${formatTime(appointmentTime)}.`,
+        })
+        toast.success("New appointment scheduled")
 
         // Reset form
         setSelectedPatient(null)
@@ -533,6 +545,18 @@ export default function AppointmentsPage() {
   // Helper function to get patient information by patient_id
   const getPatientById = (patientId: string) => {
     return patients.find((patient) => patient.patient_id === patientId)
+  }
+
+  // Helper function to convert 24-hour time to 12-hour time format
+  const formatTime = (time24: string | undefined): string => {
+    if (!time24) return "No time specified"
+
+    const [hourStr, minute] = time24.split(":")
+    const hour = Number.parseInt(hourStr, 10)
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+    const ampm = hour < 12 ? "AM" : "PM"
+
+    return `${hour12}:${minute} ${ampm}`
   }
 
   // Render loading skeleton for calendar view
@@ -629,6 +653,100 @@ export default function AppointmentsPage() {
       </CardContent>
     </Card>
   )
+
+  // Add the following useEffect after the existing useEffect hooks:
+
+  // Set up periodic checking for appointment notifications
+  useEffect(() => {
+    const checkNotifications = () => {
+      // Get already notified appointments from localStorage
+      const notifiedAppointmentsStr = localStorage.getItem("notifiedAppointments") || "{}"
+      const notifiedAppointments = JSON.parse(notifiedAppointmentsStr)
+
+      // Current date for tracking
+      const today = new Date().toISOString().split("T")[0]
+
+      // Clean up old notifications (from previous days)
+      Object.keys(notifiedAppointments).forEach((date) => {
+        if (date !== today) {
+          delete notifiedAppointments[date]
+        }
+      })
+
+      // Initialize today's notifications if needed
+      if (!notifiedAppointments[today]) {
+        notifiedAppointments[today] = []
+      }
+
+      // Get current date and time
+      const now = new Date()
+
+      // Check for appointments that are 1 day away
+      const oneDayFromNow = new Date(now)
+      oneDayFromNow.setDate(oneDayFromNow.getDate() + 1)
+      const oneDayDate = formatDate(oneDayFromNow, "yyyy-MM-dd")
+
+      // Check for appointments that are coming up in the next hour
+      const oneHourFromNow = new Date(now)
+      oneHourFromNow.setHours(oneHourFromNow.getHours() + 1)
+      const nextHour = oneHourFromNow.getHours()
+
+      // Process each appointment to check if notifications are needed
+      appointments.forEach((appointment) => {
+        const appointmentDate = appointment.date_of_appointment.split("T")[0]
+        const appointmentTime = appointment.time_of_appointment
+        const appointmentId = appointment.appointment_id
+        const patient = getPatientById(appointment.patient_id)
+
+        if (!patient) return
+
+        const patientName = `${patient.first_name} ${patient.last_name}`
+
+        // Check for 1-day notification
+        if (appointmentDate === oneDayDate && !notifiedAppointments[today].includes(`day_${appointmentId}`)) {
+          const notificationContent = `REMINDER: Appointment for ${patientName} is scheduled for tomorrow at ${formatTime(appointmentTime)}.`
+          NotifyAdmin({ notificationContent })
+          NotifyPatient({
+            patient_id: appointment.patient_id,
+            notificationContent: `You have an appointment scheduled for tomorrow at ${formatTime(appointmentTime)}.`,
+          })
+
+          toast("You have an appointment tomorrow")
+          notifiedAppointments[today].push(`day_${appointmentId}`)
+        }
+
+        // Check for 1-hour notification
+        if (
+          appointmentDate === formatDate(now, "yyyy-MM-dd") &&
+          appointmentTime &&
+          Number.parseInt(appointmentTime.split(":")[0]) === nextHour &&
+          !notifiedAppointments[today].includes(`hour_${appointmentId}`)
+        ) {
+          const notificationContent = `URGENT: Appointment for ${patientName} is coming up in 1 hour at ${formatTime(appointmentTime)}.`
+          NotifyAdmin({ notificationContent })
+          NotifyPatient({
+            patient_id: appointment.patient_id,
+            notificationContent: `You have an appointment coming up in 1 hour at ${formatTime(appointmentTime)}.`,
+          })
+
+          toast("You have an appointment in 1 hour")
+          notifiedAppointments[today].push(`hour_${appointmentId}`)
+        }
+      })
+
+      // Save updated notifications back to localStorage
+      localStorage.setItem("notifiedAppointments", JSON.stringify(notifiedAppointments))
+    }
+
+    // Check immediately on component mount
+    checkNotifications()
+
+    // Set up interval to check every 15 minutes
+    const notificationInterval = setInterval(checkNotifications, 15 * 60 * 1000) // 15 minutes in milliseconds
+
+    // Clean up interval on component unmount
+    return () => clearInterval(notificationInterval)
+  }, [appointments])
 
   return (
     <div className="container mx-auto py-6">
@@ -775,7 +893,7 @@ export default function AppointmentsPage() {
                                     </p>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                       <Clock className="h-3 w-3" />
-                                      <span>{appointment.time_of_appointment || "No time specified"}</span>
+                                      <span>{formatTime(appointment.time_of_appointment)}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -819,7 +937,7 @@ export default function AppointmentsPage() {
                           <PopoverTrigger asChild>
                             <Button variant="outline" size="sm" className="flex items-center gap-2">
                               <Clock className="h-4 w-4" />
-                              {appointmentTime || "Select time"}
+                              {appointmentTime ? formatTime(appointmentTime) : "Select time"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-80">
@@ -834,14 +952,17 @@ export default function AppointmentsPage() {
                                     <SelectValue placeholder="Select time" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {Array.from({ length: 12 }).flatMap((_, i) => {
-                                      const hour = i + 8 // Start from 8 AM
+                                    {Array.from({ length: 10 }).flatMap((_, i) => {
+                                      const hour = i + 8 // 8 AM to 5 PM (17:00)
+                                      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+                                      const ampm = hour < 12 ? "AM" : "PM"
+                                      const hourStr = hour.toString().padStart(2, "0") // 24-hour value
                                       return [
-                                        <SelectItem key={`${hour}:00`} value={`${hour.toString().padStart(2, "0")}:00`}>
-                                          {`${hour}:00 ${hour < 12 ? "AM" : hour === 12 ? "PM" : "PM"}`}
+                                        <SelectItem key={`${hourStr}:00`} value={`${hourStr}:00`}>
+                                          {`${hour12}:00 ${ampm}`}
                                         </SelectItem>,
-                                        <SelectItem key={`${hour}:30`} value={`${hour.toString().padStart(2, "0")}:30`}>
-                                          {`${hour}:30 ${hour < 12 ? "AM" : hour === 12 ? "PM" : "PM"}`}
+                                        <SelectItem key={`${hourStr}:30`} value={`${hourStr}:30`}>
+                                          {`${hour12}:30 ${ampm}`}
                                         </SelectItem>,
                                       ]
                                     })}
@@ -920,13 +1041,17 @@ export default function AppointmentsPage() {
                                   </p>
                                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Clock className="h-3 w-3" />
-                                    <span>{appointment.time_of_appointment || "No time specified"}</span>
+                                    <span>{formatTime(appointment.time_of_appointment)}</span>
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleCompleteAppointment(appointment.appointment_id)}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-green-600 hover:bg-green-50"
+                                  onClick={() => handleCompleteAppointment(appointment.appointment_id)}
+                                >
                                   <CheckCircle className="h-4 w-4 mr-1" />
                                   Complete
                                 </Button>
@@ -992,7 +1117,7 @@ export default function AppointmentsPage() {
                                     <div className="hidden sm:block text-muted-foreground">•</div>
                                     <div className="flex items-center gap-1">
                                       <Clock className="h-3 w-3" />
-                                      <span>{appointment.time_of_appointment || "No time specified"}</span>
+                                      <span>{formatTime(appointment.time_of_appointment)}</span>
                                     </div>
                                   </div>
                                 </div>

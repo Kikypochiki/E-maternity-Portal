@@ -61,6 +61,11 @@ export default function Patient() {
     <div>
       <h1>Patient</h1>
       <Button onClick={handleLogout} disabled={isLoggingOut}>Logout</Button>
+      <div>
+        <p>Welcome to the Patient Portal</p>
+        <p>Here you can manage your health records and communicate with your healthcare provider.</p>
+      </div>
+
     </div>
   )
 }
