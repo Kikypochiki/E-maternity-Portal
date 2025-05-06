@@ -27,6 +27,52 @@ import {
   Stethoscope,
   UserCheck,
 } from "lucide-react"
+interface PatientData {
+  patient_id: string;
+  patient_id_provided: string;
+  user_id: string;
+  first_name: string;
+  middle_initial: string;
+  last_name: string;
+  sex: string;
+  date_of_birth: string;
+  contact_number: string;
+  permanent_address: string;
+  civil_status: string;
+  religion: string;
+  nationality: string;
+  birthplace: string;
+  occupation?: string;
+  spouse_name?: string;
+  gravidity?: number;
+  parity?: number;
+}
+
+interface Appointment {
+  date_of_appointment: string;
+  time_of_appointment: string;
+}
+
+interface Notification {
+  notif_id: string;
+  notif_content: string;
+  created_at: string;
+}
+
+interface LabFile {
+  id: string;
+  file_name: string;
+  created_at: string;
+}
+
+interface AdmissionData {
+  created_at: string;
+  attending_clinic_staff?: string;
+  referring_personnel?: string;
+  admission_type?: string;
+  admitting_diagnosis?: string;
+  admitting_diagnosis_icd_code?: string;
+}
 
 export default function Patient() {
   const router = useRouter()
@@ -34,12 +80,12 @@ export default function Patient() {
 
   const [isLoggingOut, setIsLoggingOut] = React.useState<boolean>(false)
   const [isLoading, setIsLoading] = React.useState<boolean>(true)
-  const [patientData, setPatientData] = React.useState<any>(null)
+  const [patientData, setPatientData] = React.useState<PatientData | null>(null)
   const [error, setError] = React.useState<string | null>(null)
-  const [appointments, setAppointments] = React.useState<any[]>([])
-  const [notifications, setNotifications] = React.useState<any[]>([])
-  const [labFiles, setLabFiles] = React.useState<any[]>([])
-  const [admissionData, setAdmissionData] = React.useState<any>(null)
+  const [appointments, setAppointments] = React.useState<Appointment[]>([])
+  const [notifications, setNotifications] = React.useState<Notification[]>([])
+  const [labFiles, setLabFiles] = React.useState<LabFile[]>([])
+  const [admissionData, setAdmissionData] = React.useState<AdmissionData | null>(null)
   const [isDeleting, setIsDeleting] = React.useState<string | null>(null)
   const [isDownloading, setIsDownloading] = React.useState<string | null>(null)
 
@@ -225,6 +271,12 @@ export default function Patient() {
   const handleDownloadFile = async (fileName: string) => {
     try {
       setIsDownloading(fileName)
+
+      if (!patientData) {
+        toast("Patient data not loaded. Please try again later.")
+        setIsDownloading(null)
+        return
+      }
 
       // Construct the correct path: patient_id/filename
       const filePath = `${patientData.patient_id}/${fileName}`
@@ -589,7 +641,7 @@ export default function Patient() {
                   <CardContent>
                     {notifications.length > 0 ? (
                       <div className="space-y-4">
-                        {notifications.map((notification: any) => (
+                        {notifications.map((notification: Notification) => (
                           <div
                             key={notification.notif_id ?? `${notification.created_at}-${notification.notif_content}`}
                             className="flex items-start p-3 border rounded-lg"
