@@ -633,7 +633,7 @@ export default function Patient() {
                   <CardContent>
                     {notifications.length > 0 ? (
                       <div className="space-y-4">
-                        {notifications.map((notification: any) => (
+                        {notifications.map((notification: Notification) => (
                           <div
                             key={notification.notif_id ?? `${notification.created_at}-${notification.notif_content}`}
                             className="flex items-start p-3 border rounded-lg"
