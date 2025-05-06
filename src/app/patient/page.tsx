@@ -745,7 +745,7 @@ export default function Patient() {
         <Card>
           <CardHeader>
             <CardTitle>No Patient Record Found</CardTitle>
-            <CardDescription>We couldn't find a patient record associated with your account.</CardDescription>
+            <CardDescription>We couldn&#39;t find a patient record associated with your account.</CardDescription>
           </CardHeader>
           <CardFooter>
             <Button onClick={() => router.push("/auth_admin/login")}>Return to Login</Button>
