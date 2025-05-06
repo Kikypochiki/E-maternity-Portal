@@ -1,7 +1,6 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 
 // Update the Notification type to use notif_id instead of id
