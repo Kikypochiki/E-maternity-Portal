@@ -40,21 +40,6 @@ const data = [
     icon: Bell,
   },
   {
-    title: "Profile",
-    url: "#",
-    icon: User,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-  {
     title: "Help",
     url: "#",
     icon: CircleHelp,

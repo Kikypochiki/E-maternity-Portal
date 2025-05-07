@@ -129,7 +129,7 @@ export default function NavUser({
         toast?.("There was a problem updating your profile. Please try again.")
       } else {
         toast?.("Profile updated successfully.")
-        router.refresh()
+        window.location.reload()
       }
     } catch (error) {
       console.error("Unexpected error during profile update:", error)
