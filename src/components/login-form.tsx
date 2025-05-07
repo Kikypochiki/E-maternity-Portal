@@ -103,7 +103,7 @@ function LoginFormContent() {
               <p>
                 Don&apos;t have an account?{" "}
                 <a
-                  href="/auth_admin/signup_patient"
+                  href="/auth_admin/signup"
                   className="font-medium text-primary hover:underline"
                 >
                   Sign up

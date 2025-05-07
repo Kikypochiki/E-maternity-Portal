@@ -8,7 +8,7 @@ function LandingPage() {
   };
 
   const handleSignup = () => {
-    window.location.href = "/auth_admin/signup_patient";
+    window.location.href = "/auth_admin/signup";
   };
 
   return (

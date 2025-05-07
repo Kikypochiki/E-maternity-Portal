@@ -70,7 +70,6 @@ async function patientSignUp(email: string, password: string, patientId: string)
       toast.error("Failed to link account. Please contact support.");
     } else {
       console.log("Patient info updated successfully with user_id.");
-      toast.success("Sign up successful! Please check your email to verify.");
     }
   }
   
@@ -87,7 +86,6 @@ async function patientSignUp(email: string, password: string, patientId: string)
           toast.error("Failed to assign role. Please contact support.");
         } else {
           console.log("Role 'patient' assigned successfully.");
-          toast.success("Account setup complete!");
         }
       } else {
         console.error("User data is null. Cannot assign role.");
@@ -184,15 +182,6 @@ export function SignupForm({
                 className="font-medium text-primary hover:underline"
               >
                 Login
-              </a>
-              </p>
-              <p className="mt-2">
-              Want to manage the portal?{" "}
-              <a
-                href="/auth_admin/signup"
-                className="font-medium text-primary hover:underline"
-              >
-                Sign up as Admin
               </a>
               </p>
             </div>
