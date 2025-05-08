@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, Trash, ClipboardList, UserMinus, Pill, MoreVertical, FileText, Upload} from "lucide-react"
+import { Eye, Trash, ClipboardList, UserMinus, Pill, MoreVertical, FileText, Upload } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -37,6 +37,7 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
   const filteredData = data.filter(
     (admission) =>
       admission.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      admission.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       admission.admission_id.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
@@ -49,7 +50,7 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
     <div className="w-full space-y-4 p-7">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search Last Name..."
+          placeholder="Search Patient..."
           value={searchQuery}
           onChange={(event) => {
             setSearchQuery(event.target.value)
@@ -193,15 +194,15 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
 
                     <DropdownMenuItem asChild className="focus:bg-red-50">
                       <AdmissionDeleteDialog
-                      admissionId={admission.admission_id}
-                      patientName={`${admission.first_name} ${admission.last_name}`}
-                      onPatientDeleted={onAdmissionDeleted}
-                      trigger={
-                        <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm text-red-600">
-                        <Trash className="h-4 w-4 mr-2 text-red-600" />
-                        Delete
-                        </button>
-                      }
+                        admissionId={admission.admission_id}
+                        patientName={`${admission.first_name} ${admission.last_name}`}
+                        onPatientDeleted={onAdmissionDeleted}
+                        trigger={
+                          <button className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm text-red-600">
+                            <Trash className="h-4 w-4 mr-2 text-red-600" />
+                            Delete
+                          </button>
+                        }
                       />
                     </DropdownMenuItem>
                   </DropdownMenuContent>

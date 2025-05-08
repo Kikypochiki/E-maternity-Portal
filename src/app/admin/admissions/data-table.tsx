@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = React.useState("")
 
   const table = useReactTable({
     data,
@@ -44,6 +45,18 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     state: {
       sorting,
       columnFilters,
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchValue = String(filterValue).toLowerCase()
+
+      // Check if any of the specified fields contain the search value
+      const lastName = String(row.getValue("last_name") || "").toLowerCase()
+      const firstName = String(row.getValue("first_name") || "").toLowerCase()
+      const admissionId = String(row.getValue("admission_id") || "").toLowerCase()
+
+      return lastName.includes(searchValue) || firstName.includes(searchValue) || admissionId.includes(searchValue)
     },
   })
 
@@ -51,9 +64,9 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     <div className="w-full space-y-4 p-7">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search Last Name..."
-          value={(table.getColumn("last_name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("last_name")?.setFilterValue(event.target.value)}
+          placeholder="Search Patient..."
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
       </div>

@@ -55,42 +55,67 @@ export const columns: ColumnDef<Admission>[] = [
         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           Last Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+      },
+      {
+        accessorKey: "admission_status",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        Status
+        <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      )
-    },
-  },
-  {
-    accessorKey: "admission_status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("admission_status") as string
+      ),
+      cell: ({ row }) => {
+        const status = row.getValue("admission_status") as string
 
-      return (
+        return (
         <Badge
           variant={status === "Admitted" ? "default" : "secondary"}
           className={
-            status === "Admitted"
-              ? "bg-green-100 text-green-800 hover:bg-green-200"
-              : "bg-red-100 text-gray-800 hover:bg-red-200"
+          status === "Admitted"
+            ? "bg-green-100 text-green-800 hover:bg-green-200"
+            : "bg-red-100 text-gray-800 hover:bg-red-200"
           }
         >
           {status}
         </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: "created_at",
-    header: "Date",
-    cell: ({ row }) => {
-      const date = row.getValue("created_at") as string
-      // Format date if needed
-      return date ? new Date(date).toLocaleDateString() : "N/A"
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
+        )
+      },
+      sortingFn: (rowA, rowB, columnId) => {
+        const statusOrder = { "Admitted": 0, "Discharged": 1 }
+        const getStatusKey = (value: unknown): "Admitted" | "Discharged" =>
+          value === "Admitted" ? "Admitted" : "Discharged";
+        const a = statusOrder[getStatusKey(rowA.getValue(columnId))];
+        const b = statusOrder[getStatusKey(rowB.getValue(columnId))];
+        return a - b
+            },
+          },
+          {
+            accessorKey: "created_at",
+            header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Date Admitted
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+            ),
+            cell: ({ row }) => {
+        const date = row.getValue("created_at") as string
+        return date ? new Date(date).toLocaleDateString() : "N/A"
+            },
+            sortingFn: (rowA, rowB, columnId) => {
+        const a = rowA.getValue(columnId) as string | undefined
+        const b = rowB.getValue(columnId) as string | undefined
+        if (!a && !b) return 0
+        if (!a) return 1
+        if (!b) return -1
+        return new Date(a).getTime() - new Date(b).getTime()
+            },
+          },
+          {
+            id: "actions",
+            cell: ({ row }) => {
       const admission = row.original
 
       return (
