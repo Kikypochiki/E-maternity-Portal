@@ -180,7 +180,6 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
 
                     <DropdownMenuItem asChild>
                       <LabFilesUpload
-                        admissionId={admission.admission_id}
                         patientId={admission.patient_id}
                         patientName={`${admission.first_name} ${admission.last_name}`}
                         trigger={

@@ -37,7 +37,6 @@ interface LabFilesUploadProps {
   patientName: string
   onFileUploaded?: () => void
   trigger: React.ReactNode
-  admissionId: string
 }
 
 type LabFile = {
@@ -49,7 +48,7 @@ type LabFile = {
 
 const supabase = createClient()
 
-export function LabFilesUpload({ patientId, patientName, onFileUploaded, trigger, admissionId}: LabFilesUploadProps) {
+export function LabFilesUpload({ patientId, patientName, onFileUploaded, trigger}: LabFilesUploadProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [files, setFiles] = useState<File[]>([])
@@ -61,8 +60,8 @@ export function LabFilesUpload({ patientId, patientName, onFileUploaded, trigger
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isPatientDischarged, setIsPatientDischarged] = useState(false)
-  const [isCheckingStatus, setIsCheckingStatus] = useState(false)
+  const [isPatientDischarged] = useState(false)
+  const [isCheckingStatus] = useState(false)
 
   const fetchLabFiles = async () => {
     try {
@@ -91,42 +90,11 @@ export function LabFilesUpload({ patientId, patientName, onFileUploaded, trigger
     }
   }
 
-  const checkAdmissionStatus = async () => {
-    try {
-      setIsCheckingStatus(true)
-      const { data, error } = await supabase
-        .from("Admissions")
-        .select("admission_status")
-        .eq("admission_id", admissionId)
-        .single()
-
-      if (error) {
-        console.error("Error checking admission status:", error.message)
-        toast("Failed to check admission status. Please try again.")
-        return
-      }
-
-      // Set discharge status and ensure we're on the view tab if discharged
-      if (data && data.admission_status === "Discharged") {
-        setIsPatientDischarged(true)
-        // Force view tab for discharged patients
-        setActiveTab("view")
-      } else {
-        setIsPatientDischarged(false)
-      }
-    } catch (error) {
-      console.error("Unexpected error:", error)
-      toast("An unexpected error occurred while checking admission status.")
-    } finally {
-      setIsCheckingStatus(false)
-    }
-  }
-
+ 
   // When dialog opens, check status and fetch lab files
   useEffect(() => {
     if (isOpen) {
       const initialize = async () => {
-        await checkAdmissionStatus()
         await fetchLabFiles()
       }
       initialize()

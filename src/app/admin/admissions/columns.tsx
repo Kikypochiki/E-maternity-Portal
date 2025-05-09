@@ -12,7 +12,6 @@ import { MedicationsForm } from "@/components/modals/medications_form"
 import { NotesAttachmentForm } from "@/components/modals/notes_attachment_form"
 import { LabFilesUpload } from "@/components/modals/lab-files-upload"
 
-// Define the Admission type based on your database schema
 export type Admission = {
   admission_id: string
   patient_id: string
@@ -215,7 +214,6 @@ export const columns: ColumnDef<Admission>[] = [
           </div>
           <div>
             <LabFilesUpload
-              admissionId={admission.admission_id}
               patientId={admission.patient_id}
               patientName={`${admission.first_name} ${admission.last_name}`}
               trigger={

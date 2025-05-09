@@ -27,7 +27,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState("")
-  const [activeFilter, setActiveFilter] = React.useState<"all" | "admitted" | "discharged">("all")
+  const [] = React.useState<"all" | "admitted" | "discharged">("all")
 
   const table = useReactTable({
     data,
@@ -49,15 +49,14 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
       globalFilter,
     },
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
+    globalFilterFn: (row, _columnId, filterValue) => {
       const searchValue = String(filterValue).toLowerCase()
 
-      // Check if any of the specified fields contain the search value
+
       const lastName = String(row.getValue("last_name") || "").toLowerCase()
       const firstName = String(row.getValue("first_name") || "").toLowerCase()
-      const admissionId = String(row.getValue("admission_id") || "").toLowerCase()
 
-      return lastName.includes(searchValue) || firstName.includes(searchValue) || admissionId.includes(searchValue)
+      return lastName.includes(searchValue) || firstName.includes(searchValue)
     },
   })
 
@@ -70,42 +69,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
-        <div className="flex items-center ml-4 space-x-2">
-          <Button
-            variant={activeFilter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setColumnFilters([])
-              setGlobalFilter("")
-              setActiveFilter("all")
-            }}
-            className="px-3"
-          >
-            All
-          </Button>
-          <Button
-            variant={activeFilter === "admitted" ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setColumnFilters([{ id: "admission_status", value: "Admitted" }])
-              setActiveFilter("admitted")
-            }}
-            className="px-3"
-          >
-            Admitted
-          </Button>
-          <Button
-            variant={activeFilter === "discharged" ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setColumnFilters([{ id: "admission_status", value: "Discharged" }])
-              setActiveFilter("discharged")
-            }}
-            className="px-3"
-          >
-            Discharged
-          </Button>
-        </div>
       </div>
       <div className="rounded-md border">
         <Table>
