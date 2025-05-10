@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,6 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, CalendarIcon, Clock, User, Plus, X, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -773,9 +773,10 @@ export default function AppointmentsPage() {
                     <span>New Appointment</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
+
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">Select Patient</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold text-primary">Select Patient</DialogTitle>
                     <DialogDescription>Search and select a patient to schedule an appointment.</DialogDescription>
                   </DialogHeader>
 
@@ -791,8 +792,8 @@ export default function AppointmentsPage() {
                   </div>
 
                   {/* Patient list */}
-                  <ScrollArea className="flex-grow">
-                    <div className="flex flex-col gap-2 pr-4">
+                  <ScrollArea className="flex-1 overflow-auto">
+                    <div className="flex flex-col gap-2 pr-4 pb-4">
                       {isLoading ? (
                         // Skeleton loading state
                         Array.from({ length: 5 }).map((_, index) => (
@@ -827,11 +828,6 @@ export default function AppointmentsPage() {
                     </div>
                   </ScrollArea>
 
-                  <DialogFooter className="mt-4">
-                    <Button variant="outline" onClick={() => setIsSelectPatientOpen(false)}>
-                      Cancel
-                    </Button>
-                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </>

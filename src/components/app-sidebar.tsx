@@ -44,11 +44,6 @@ const data = [
     url: "/admin/notifications",
     icon: Bell,
   },
-  {
-    title: "Help",
-    url: "#",
-    icon: CircleHelp,
-  },
 ]
 
 

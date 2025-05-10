@@ -555,9 +555,6 @@ export function MedicationsForm({
                     </div>
 
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setActiveTab("view")}>
-                        Cancel
-                      </Button>
                       <Button type="submit" disabled={isProcessing || isPatientDischarged}>
                         {isProcessing ? (
                           <>

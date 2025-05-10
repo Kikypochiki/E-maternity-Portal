@@ -270,11 +270,6 @@ export function PrenatalAddForm({ trigger, onPrenatalAdded }: PrenatalAddFormPro
             )}
           </div>
 
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setIsSelectOpen(false)}>
-              Cancel
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 

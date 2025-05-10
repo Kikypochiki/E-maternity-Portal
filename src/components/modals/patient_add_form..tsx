@@ -503,14 +503,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 className="flex justify-end gap-2 pt-4"
               >
                 <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={isSubmitting}
-                className="transition-all duration-200 hover:bg-muted"
-                >
-                Cancel
-                </Button>
-                <Button
                   type="submit"
                   disabled={isSubmitting}
                   className="bg-primary hover:bg-primary/90 transition-all duration-200"

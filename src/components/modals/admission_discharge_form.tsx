@@ -357,9 +357,6 @@ export function AdmissionDischargeForm({
               </div>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
-                  Cancel
-                </Button>
                 <Button onClick={handleDischarge} disabled={isProcessing}>
                   {isProcessing ? (
                     <>

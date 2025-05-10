@@ -61,7 +61,7 @@ export function DataTable<TData, TValue>({ columns, data, onDeleteSelected }: Da
     <div>
       <div className="flex items-center py-4 justify-between">
         <Input
-          placeholder="Filter notifications..."
+          placeholder="Search Notifications..."
           value={(table.getColumn("notif_content")?.getFilterValue() as string) ?? ""}
           onChange={(event) => table.getColumn("notif_content")?.setFilterValue(event.target.value)}
           className="max-w-sm"

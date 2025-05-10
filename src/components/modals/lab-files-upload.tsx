@@ -475,9 +475,6 @@ export function LabFilesUpload({ patientId, patientName, onFileUploaded, trigger
               </div>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setActiveTab("view")}>
-                  Cancel
-                </Button>
                 <Button onClick={handleUpload} disabled={isProcessing || files.length === 0}>
                   {isProcessing ? (
                     <>

@@ -535,9 +535,6 @@ export function DoctorsOrdersForm({
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setActiveTab("view")}>
-                    Cancel
-                  </Button>
                   <Button onClick={handleAddOrder} disabled={isProcessing || isPatientDischarged}>
                     {isProcessing ? (
                       <>

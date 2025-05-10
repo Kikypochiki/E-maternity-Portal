@@ -103,7 +103,7 @@ export default function Admissions() {
             </div>
           ) : (
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Addmissions</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Admissions</h1>
                 <p className="text-muted-foreground">View and manage patient admissions</p>
               </div>
           )}

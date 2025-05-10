@@ -425,9 +425,6 @@ export function PrenatalDiagnosisForm({
               </div>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setActiveTab("view")}>
-                  Cancel
-                </Button>
                 <Button onClick={handleAddInfo} disabled={isProcessing}>
                   {isProcessing ? (
                     <>

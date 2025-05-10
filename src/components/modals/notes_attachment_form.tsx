@@ -472,9 +472,6 @@ export function NotesAttachmentForm({
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setActiveTab("view")}>
-                    Cancel
-                  </Button>
                   <Button onClick={handleAddNote} disabled={isProcessing || isPatientDischarged}>
                     {isProcessing ? (
                       <>
