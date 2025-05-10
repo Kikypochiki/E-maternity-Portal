@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Trash, } from "lucide-react"
+import { ArrowUpDown, Trash2, } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PatientDeleteDialog } from "@/components/modals/patient_delete_dialog"
 import { PatientBasicInfoView } from "@/components/modals/patient_basic_info_view"
@@ -96,7 +96,7 @@ export const columns: ColumnDef<Patient>[] = [
         }}
         trigger={
         <Button variant="ghost" className="hover:relative group">
-        <Trash className="h-4 w-4 text-red-600" />
+        <Trash2 className="h-4 w-4 text-red-600" />
         <span className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-primary text-white text-xs rounded px-2 py-1">
           Delete Patient
         </span>

@@ -37,8 +37,7 @@ export function DeleteConfirmationDialog({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-red-600 flex items-center gap-2">
-            <Trash2 className="h-5 w-5" />
+          <AlertDialogTitle>
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-slate-600">{description}</AlertDialogDescription>

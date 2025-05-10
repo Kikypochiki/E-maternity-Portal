@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 import NotifyAdmin from "@/components/modals/notify-admin"
 import NotifyPatient from "@/components/modals/notify-patient"
+import { motion, AnimatePresence } from "framer-motion"
 
 type Patient = {
   patient_id: string
@@ -256,7 +257,7 @@ const CustomCalendar = ({
                 isTodayDate && !isSelected && "bg-accent text-accent-foreground",
                 hasAppts && !isSelected && "font-bold bg-primary/10 text-primary",
                 !day.isPast && !isSelected && "hover:bg-accent hover:text-accent-foreground",
-                "cursor-pointer",
+                "cursor-pointer transition-all duration-200",
               )}
               onClick={() => {
                 if (!day.isPast) {
@@ -773,61 +774,104 @@ export default function AppointmentsPage() {
                   </Button>
                 </DialogTrigger>
 
-                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
-                  <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-primary">Select Patient</DialogTitle>
-                    <DialogDescription>Search and select a patient to schedule an appointment.</DialogDescription>
-                  </DialogHeader>
-
-                  {/* Search input */}
-                  <div className="relative mb-4">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search patients by name or ID..."
-                      className="pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Patient list */}
-                  <ScrollArea className="flex-1 overflow-auto">
-                    <div className="flex flex-col gap-2 pr-4 pb-4">
-                      {isLoading ? (
-                        // Skeleton loading state
-                        Array.from({ length: 5 }).map((_, index) => (
-                          <div key={index} className="p-4 border rounded-md">
-                            <div className="flex flex-col gap-2">
-                              <Skeleton className="h-5 w-3/4" />
-                              <Skeleton className="h-4 w-1/2" />
-                            </div>
-                          </div>
-                        ))
-                      ) : filteredPatients.length > 0 ? (
-                        filteredPatients.map((patient) => (
-                          <div
-                            key={patient.patient_id}
-                            className="flex flex-row items-center justify-between p-4 border rounded-md hover:bg-muted cursor-pointer"
-                            onClick={() => handlePatientSelect(patient)}
+                <AnimatePresence>
+                  {isSelectPatientOpen && (
+                    <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <DialogHeader>
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1, duration: 0.3 }}
                           >
-                            <div className="flex flex-col">
-                              <span className="font-medium">{`${patient.first_name} ${patient.middle_initial ? patient.middle_initial + " " : ""}${patient.last_name}`}</span>
-                              <span className="text-sm text-muted-foreground">{`Patient ID: ${patient.patient_id_provided}`}</span>
-                            </div>
-                            <Button variant="ghost" size="sm">
-                              Select
-                            </Button>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                          {searchQuery ? "No patients found matching your search" : "No patients available"}
-                        </div>
-                      )}
-                    </div>
-                  </ScrollArea>
+                            <DialogTitle className="text-2xl font-bold text-primary">Select Patient</DialogTitle>
+                            <DialogDescription>
+                              Search and select a patient to schedule an appointment.
+                            </DialogDescription>
+                          </motion.div>
+                        </DialogHeader>
 
-                </DialogContent>
+                        {/* Search input */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2, duration: 0.3 }}
+                          className="relative mb-4"
+                        >
+                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search patients by name or ID..."
+                            className="pl-8"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                          />
+                        </motion.div>
+
+                        {/* Patient list */}
+                        <ScrollArea className="flex-1 pr-4" style={{ height: "300px" }}>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.3, duration: 0.3 }}
+                            className="flex flex-col gap-2 pb-4"
+                          >
+                            {isLoading ? (
+                              // Skeleton loading state
+                              Array.from({ length: 5 }).map((_, index) => (
+                                <motion.div
+                                  key={`skeleton-${index}`}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.3 + index * 0.05, duration: 0.2 }}
+                                  className="p-4 border rounded-md"
+                                >
+                                  <div className="flex flex-col gap-2">
+                                    <Skeleton className="h-5 w-3/4" />
+                                    <Skeleton className="h-4 w-1/2" />
+                                  </div>
+                                </motion.div>
+                              ))
+                            ) : filteredPatients.length > 0 ? (
+                              filteredPatients.map((patient, index) => (
+                                <motion.div
+                                  key={`patient-${patient.patient_id}`}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.3 + index * 0.05, duration: 0.2 }}
+                                  whileHover={{ scale: 1.02, backgroundColor: "rgba(0,0,0,0.02)" }}
+                                  className="flex flex-row items-center justify-between p-4 border rounded-md hover:bg-muted cursor-pointer"
+                                  onClick={() => handlePatientSelect(patient)}
+                                >
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{`${patient.first_name} ${patient.middle_initial ? patient.middle_initial + " " : ""}${patient.last_name}`}</span>
+                                    <span className="text-sm text-muted-foreground">{`Patient ID: ${patient.patient_id_provided}`}</span>
+                                  </div>
+                                  <Button variant="ghost" size="sm">
+                                    Select
+                                  </Button>
+                                </motion.div>
+                              ))
+                            ) : (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="text-center py-4 text-muted-foreground"
+                              >
+                                {searchQuery ? "No patients found matching your search" : "No patients available"}
+                              </motion.div>
+                            )}
+                          </motion.div>
+                        </ScrollArea>
+                      </motion.div>
+                    </DialogContent>
+                  )}
+                </AnimatePresence>
               </Dialog>
             </>
           )}
@@ -839,308 +883,332 @@ export default function AppointmentsPage() {
             {renderCalendarSkeleton()}
           </div>
         ) : (
-          <Tabs defaultValue="calendar" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="calendar">Calendar</TabsTrigger>
-              <TabsTrigger value="today">Today&apos;s Appointments</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
-            </TabsList>
+          <div>
+            <Tabs defaultValue="calendar" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                <TabsTrigger value="today">Today&apos;s Appointments</TabsTrigger>
+                <TabsTrigger value="upcoming">Upcoming Appointments</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="calendar" className="mt-6">
-              {isLoading ? (
-                renderCalendarSkeleton()
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="col-span-1">
-                    <CardHeader className="pb-2">
-                      <CardTitle>Select Date</CardTitle>
-                      <CardDescription className="text-sm">Choose a date for the appointment</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-2">
-                      <div className="flex justify-center">
-                        <CustomCalendar value={date} onChange={setDate} hasAppointments={hasAppointments} />
+              <AnimatePresence mode="wait">
+                <TabsContent value="calendar" className="mt-6">
+                  {isLoading ? (
+                    renderCalendarSkeleton()
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="col-span-1">
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle>Select Date</CardTitle>
+                            <CardDescription className="text-sm">Choose a date for the appointment</CardDescription>
+                          </CardHeader>
+                          <CardContent className="p-2">
+                            <div className="flex justify-center">
+                              <CustomCalendar value={date} onChange={setDate} hasAppointments={hasAppointments} />
+                            </div>
+                          </CardContent>
+                        </Card>
                       </div>
-                    </CardContent>
-                  </Card>
 
-                  <Card className="col-span-1 md:col-span-2">
-                    <CardHeader>
-                      <CardTitle>{formatDate(date, "MMMM d, yyyy")} - Appointments</CardTitle>
-                      <CardDescription>{getAppointmentsForDate(date).length} appointments scheduled</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {getAppointmentsForDate(date).length > 0 ? (
-                        <div className="space-y-4">
-                          {getAppointmentsForDate(date).map((appointment) => {
-                            const patient = getPatientById(appointment.patient_id)
-                            return (
-                              <div
-                                key={appointment.appointment_id}
-                                className="flex items-center justify-between p-4 border rounded-md"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
-                                    <User className="h-5 w-5" />
-                                  </div>
-                                  <div>
-                                    <p className="font-medium">
-                                      {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
-                                    </p>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      <span>{formatTime(appointment.time_of_appointment)}</span>
+                      <div className="col-span-1 md:col-span-2">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>{formatDate(date, "MMMM d, yyyy")} - Appointments</CardTitle>
+                            <CardDescription>
+                              {getAppointmentsForDate(date).length} appointments scheduled
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            {getAppointmentsForDate(date).length > 0 ? (
+                              <div className="space-y-4">
+                                {getAppointmentsForDate(date).map((appointment, index) => {
+                                  const patient = getPatientById(appointment.patient_id)
+                                  return (
+                                    <div
+                                      key={appointment.appointment_id}
+                                      className="flex items-center justify-between p-4 border rounded-md"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                          <User className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium">
+                                            {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
+                                          </p>
+                                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <Clock className="h-3 w-3" />
+                                            <span>{formatTime(appointment.time_of_appointment)}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="text-destructive hover:bg-destructive/10"
+                                          onClick={() => handleCancelAppointment(appointment.appointment_id)}
+                                        >
+                                          <X className="h-4 w-4 mr-1" />
+                                          Cancel
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-8 text-center">
+                                <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
+                                <p className="text-muted-foreground">No appointments scheduled for this date</p>
+                              </div>
+                            )}
+                          </CardContent>
+                          <CardFooter className="flex justify-between">
+                            <div className="text-sm text-muted-foreground">
+                              {selectedPatient ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="bg-primary/10 text-primary">
+                                    {selectedPatient.first_name} {selectedPatient.last_name}
+                                  </Badge>
+                                  <Button variant="ghost" size="sm" onClick={() => setSelectedPatient(null)}>
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                "No patient selected"
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    {appointmentTime ? formatTime(appointmentTime) : "Select time"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                  <div className="grid gap-4">
+                                    <div className="space-y-2">
+                                      <h4 className="font-medium leading-none">Appointment Time</h4>
+                                      <p className="text-sm text-muted-foreground">Set the time for this appointment</p>
+                                    </div>
+                                    <div className="grid gap-2">
+                                      <Select value={appointmentTime} onValueChange={setAppointmentTime}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select time" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {Array.from({ length: 10 }).flatMap((_, i) => {
+                                            const hour = i + 8 // 8 AM to 5 PM (17:00)
+                                            const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+                                            const ampm = hour < 12 ? "AM" : "PM"
+                                            const hourStr = hour.toString().padStart(2, "0") // 24-hour value
+                                            return [
+                                              <SelectItem key={`time-${hourStr}-00`} value={`${hourStr}:00`}>
+                                                {`${hour12}:00 ${ampm}`}
+                                              </SelectItem>,
+                                              <SelectItem key={`time-${hourStr}-30`} value={`${hourStr}:30`}>
+                                                {`${hour12}:30 ${ampm}`}
+                                              </SelectItem>,
+                                            ]
+                                          })}
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                   </div>
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-destructive hover:bg-destructive/10"
-                                  onClick={() => handleCancelAppointment(appointment.appointment_id)}
-                                >
-                                  <X className="h-4 w-4 mr-1" />
-                                  Cancel
-                                </Button>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
-                          <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
-                          <p className="text-muted-foreground">No appointments scheduled for this date</p>
-                        </div>
-                      )}
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <div className="text-sm text-muted-foreground">
-                        {selectedPatient ? (
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-primary/10 text-primary">
-                              {selectedPatient.first_name} {selectedPatient.last_name}
-                            </Badge>
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedPatient(null)}>
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          "No patient selected"
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm" className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              {appointmentTime ? formatTime(appointmentTime) : "Select time"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80">
-                            <div className="grid gap-4">
-                              <div className="space-y-2">
-                                <h4 className="font-medium leading-none">Appointment Time</h4>
-                                <p className="text-sm text-muted-foreground">Set the time for this appointment</p>
-                              </div>
-                              <div className="grid gap-2">
-                                <Select value={appointmentTime} onValueChange={setAppointmentTime}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select time" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {Array.from({ length: 10 }).flatMap((_, i) => {
-                                      const hour = i + 8 // 8 AM to 5 PM (17:00)
-                                      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-                                      const ampm = hour < 12 ? "AM" : "PM"
-                                      const hourStr = hour.toString().padStart(2, "0") // 24-hour value
-                                      return [
-                                        <SelectItem key={`${hourStr}:00`} value={`${hourStr}:00`}>
-                                          {`${hour12}:00 ${ampm}`}
-                                        </SelectItem>,
-                                        <SelectItem key={`${hourStr}:30`} value={`${hourStr}:30`}>
-                                          {`${hour12}:30 ${ampm}`}
-                                        </SelectItem>,
-                                      ]
-                                    })}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <Button onClick={handleCreateAppointment} disabled={!selectedPatient || isSubmitting}>
-                          {isSubmitting ? (
-                            <>
-                              <span className="mr-2">
-                                <svg
-                                  className="animate-spin h-4 w-4 text-white"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                  ></circle>
-                                  <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                  ></path>
-                                </svg>
-                              </span>
-                              Scheduling...
-                            </>
-                          ) : (
-                            "Schedule Appointment"
-                          )}
-                        </Button>
-                      </div>
-                    </CardFooter>
-                  </Card>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="today" className="mt-6">
-              {isLoading ? (
-                renderAppointmentListSkeleton()
-              ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Today&apos;s Appointments</CardTitle>
-                    <CardDescription>
-                      {formatDate(new Date(), "MMMM d, yyyy")} - {todaysAppointments.length} appointments
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {todaysAppointments.length > 0 ? (
-                      <div className="space-y-4">
-                        {todaysAppointments.map((appointment) => {
-                          const patient = getPatientById(appointment.patient_id)
-                          return (
-                            <div
-                              key={appointment.appointment_id}
-                              className="flex items-center justify-between p-4 border rounded-md"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
-                                  <User className="h-5 w-5" />
-                                </div>
-                                <div>
-                                  <p className="font-medium">
-                                    {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Clock className="h-3 w-3" />
-                                    <span>{formatTime(appointment.time_of_appointment)}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-green-600 hover:bg-green-50"
-                                  onClick={() => handleCompleteAppointment(appointment.appointment_id)}
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  Complete
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-destructive hover:bg-destructive/10"
-                                  onClick={() => handleCancelAppointment(appointment.appointment_id)}
-                                >
-                                  <X className="h-4 w-4 mr-1" />
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
-                        <p className="text-muted-foreground">No appointments scheduled for today</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="upcoming" className="mt-6">
-              {isLoading ? (
-                renderAppointmentListSkeleton()
-              ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upcoming Appointments</CardTitle>
-                    <CardDescription>Next {upcomingAppointments.length} scheduled appointments</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {upcomingAppointments.length > 0 ? (
-                      <div className="space-y-4">
-                        {upcomingAppointments.map((appointment) => {
-                          const patient = getPatientById(appointment.patient_id)
-                          return (
-                            <div
-                              key={appointment.appointment_id}
-                              className="flex items-center justify-between p-4 border rounded-md"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
-                                  <User className="h-5 w-5" />
-                                </div>
-                                <div>
-                                  <p className="font-medium">
-                                    {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
-                                  </p>
-                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1">
-                                      <CalendarIcon className="h-3 w-3" />
-                                      <span>
-                                        {formatDate(new Date(appointment.date_of_appointment), "MMM d, yyyy")}
+                                </PopoverContent>
+                              </Popover>
+                              <div>
+                                <Button onClick={handleCreateAppointment} disabled={!selectedPatient || isSubmitting}>
+                                  {isSubmitting ? (
+                                    <>
+                                      <span className="mr-2">
+                                        <svg
+                                          className="animate-spin h-4 w-4 text-white"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                          ></circle>
+                                          <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                          ></path>
+                                        </svg>
                                       </span>
+                                      Scheduling...
+                                    </>
+                                  ) : (
+                                    "Schedule Appointment"
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="today" className="mt-6">
+                  {isLoading ? (
+                    renderAppointmentListSkeleton()
+                  ) : (
+                    <div>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Today&apos;s Appointments</CardTitle>
+                          <CardDescription>
+                            {formatDate(new Date(), "MMMM d, yyyy")} - {todaysAppointments.length} appointments
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {todaysAppointments.length > 0 ? (
+                            <div className="space-y-4">
+                              {todaysAppointments.map((appointment, index) => {
+                                const patient = getPatientById(appointment.patient_id)
+                                return (
+                                  <div
+                                    key={appointment.appointment_id}
+                                    className="flex items-center justify-between p-4 border rounded-md"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                        <User className="h-5 w-5" />
+                                      </div>
+                                      <div>
+                                        <p className="font-medium">
+                                          {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                          <Clock className="h-3 w-3" />
+                                          <span>{formatTime(appointment.time_of_appointment)}</span>
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div className="hidden sm:block text-muted-foreground">•</div>
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
-                                      <span>{formatTime(appointment.time_of_appointment)}</span>
+                                    <div className="flex items-center gap-2">
+                                      <div>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="text-green-600 hover:bg-green-50"
+                                          onClick={() => handleCompleteAppointment(appointment.appointment_id)}
+                                        >
+                                          <CheckCircle className="h-4 w-4 mr-1" />
+                                          Complete
+                                        </Button>
+                                      </div>
+                                      <div>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="text-destructive hover:bg-destructive/10"
+                                          onClick={() => handleCancelAppointment(appointment.appointment_id)}
+                                        >
+                                          <X className="h-4 w-4 mr-1" />
+                                          Cancel
+                                        </Button>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-destructive hover:bg-destructive/10"
-                                onClick={() => handleCancelAppointment(appointment.appointment_id)}
-                              >
-                                <X className="h-4 w-4 mr-1" />
-                                Cancel
-                              </Button>
+                                )
+                              })}
                             </div>
-                          )
-                        })}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
-                        <p className="text-muted-foreground">No upcoming appointments scheduled</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-          </Tabs>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                              <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
+                              <p className="text-muted-foreground">No appointments scheduled for today</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="upcoming" className="mt-6">
+                  {isLoading ? (
+                    renderAppointmentListSkeleton()
+                  ) : (
+                    <div>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Upcoming Appointments</CardTitle>
+                          <CardDescription>Next {upcomingAppointments.length} scheduled appointments</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {upcomingAppointments.length > 0 ? (
+                            <div className="space-y-4">
+                              {upcomingAppointments.map((appointment, index) => {
+                                const patient = getPatientById(appointment.patient_id)
+                                return (
+                                  <div
+                                    key={appointment.appointment_id}
+                                    className="flex items-center justify-between p-4 border rounded-md"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                                        <User className="h-5 w-5" />
+                                      </div>
+                                      <div>
+                                        <p className="font-medium">
+                                          {patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient"}
+                                        </p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-muted-foreground">
+                                          <div className="flex items-center gap-1">
+                                            <CalendarIcon className="h-3 w-3" />
+                                            <span>
+                                              {formatDate(new Date(appointment.date_of_appointment), "MMM d, yyyy")}
+                                            </span>
+                                          </div>
+                                          <div className="hidden sm:block text-muted-foreground">•</div>
+                                          <div className="flex items-center gap-1">
+                                            <Clock className="h-3 w-3" />
+                                            <span>{formatTime(appointment.time_of_appointment)}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleCancelAppointment(appointment.appointment_id)}
+                                      >
+                                        <X className="h-4 w-4 mr-1" />
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                              <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2 opacity-20" />
+                              <p className="text-muted-foreground">No upcoming appointments scheduled</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </TabsContent>
+              </AnimatePresence>
+            </Tabs>
+          </div>
         )}
       </div>
     </div>

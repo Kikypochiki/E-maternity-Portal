@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 // Generate a unique prenatal record ID
 
@@ -214,163 +215,254 @@ export function PrenatalAddForm({ trigger, onPrenatalAdded }: PrenatalAddFormPro
       <div onClick={() => setIsSelectOpen(true)}>{trigger}</div>
 
       {/* Patient selection dialog */}
-      <Dialog open={isSelectOpen} onOpenChange={setIsSelectOpen}>
-        <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-primary">Select Patient</DialogTitle>
-            <DialogDescription>Search and select a patient for prenatal care.</DialogDescription>
-          </DialogHeader>
+      <AnimatePresence>
+        {isSelectOpen && (
+          <Dialog open={isSelectOpen} onOpenChange={setIsSelectOpen}>
+            <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col h-full"
+              >
+                <DialogHeader>
+                  <motion.div
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <DialogTitle className="text-2xl font-bold text-primary">Select Patient</DialogTitle>
+                    <DialogDescription>Search and select a patient for prenatal care.</DialogDescription>
+                  </motion.div>
+                </DialogHeader>
 
-          {/* Search input */}
-          <div className="relative mb-4">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search patients by name or ID..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Patient list */}
-          <div
-            className="flex flex-col gap-2 overflow-y-auto flex-grow mt-2 pr-1"
-            style={{ maxHeight: "calc(100% - 150px)" }}
-          >
-            {isLoading ? (
-              // Skeleton loading state
-              Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="p-4 border rounded-md">
-                  <div className="flex flex-col gap-2">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                </div>
-              ))
-            ) : filteredPatients.length > 0 ? (
-              filteredPatients.map((patient) => (
-                <div
-                  key={patient.patient_id}
-                  className="flex flex-row items-center justify-between p-4 border rounded-md hover:bg-muted cursor-pointer"
-                  onClick={() => handlePatientSelect(patient)}
+                {/* Search input */}
+                <motion.div
+                  initial={{ y: -10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                  className="relative mb-4"
                 >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{`${patient.first_name} ${patient.middle_initial} ${patient.last_name}`}</span>
-                    <span className="text-sm text-muted-foreground">{`Patient ID: ${patient.patient_id_provided}`}</span>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    Select
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-muted-foreground">
-                {searchQuery ? "No patients found matching your search" : "No patients available"}
-              </div>
-            )}
-          </div>
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search patients by name or ID..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </motion.div>
 
-        </DialogContent>
-      </Dialog>
+                {/* Patient list */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="flex flex-col gap-2 overflow-y-auto flex-grow mt-2 pr-1"
+                  style={{ maxHeight: "calc(100% - 150px)" }}
+                >
+                  {isLoading ? (
+                    // Skeleton loading state
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05, duration: 0.2 }}
+                        className="p-4 border rounded-md"
+                      >
+                        <div className="flex flex-col gap-2">
+                          <Skeleton className="h-5 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : filteredPatients.length > 0 ? (
+                    filteredPatients.map((patient, index) => (
+                      <motion.div
+                        key={patient.patient_id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05, duration: 0.2 }}
+                        whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.02)" }}
+                        className="flex flex-row items-center justify-between p-4 border rounded-md hover:bg-muted cursor-pointer"
+                        onClick={() => handlePatientSelect(patient)}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">{`${patient.first_name} ${patient.middle_initial} ${patient.last_name}`}</span>
+                          <span className="text-sm text-muted-foreground">{`Patient ID: ${patient.patient_id_provided}`}</span>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          Select
+                        </Button>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-center py-4 text-muted-foreground"
+                    >
+                      {searchQuery ? "No patients found matching your search" : "No patients available"}
+                    </motion.div>
+                  )}
+                </motion.div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Prenatal form dialog */}
-      <Dialog open={isPrenatalFormOpen} onOpenChange={setIsPrenatalFormOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-primary">Prenatal Care Form</DialogTitle>
-            <DialogDescription>
-              {selectedPatient &&
-                `Complete prenatal details for ${selectedPatient.first_name} ${selectedPatient.last_name}`}
-            </DialogDescription>
-          </DialogHeader>
+      <AnimatePresence>
+        {isPrenatalFormOpen && (
+          <Dialog open={isPrenatalFormOpen} onOpenChange={setIsPrenatalFormOpen}>
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="bg-gradient-to-b from-background to-muted/30 rounded-lg"
+              >
+                <DialogHeader className="mb-4">
+                  <motion.div
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <DialogTitle className="text-2xl font-bold text-primary">Prenatal Care Form</DialogTitle>
+                    <DialogDescription>
+                      {selectedPatient &&
+                        `Complete prenatal details for ${selectedPatient.first_name} ${selectedPatient.last_name}`}
+                    </DialogDescription>
+                  </motion.div>
+                </DialogHeader>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {selectedPatient && (
-                <div className="bg-muted p-3 rounded-md mb-4">
-                  <p className="font-medium">{`${selectedPatient.first_name} ${selectedPatient.middle_initial} ${selectedPatient.last_name}`}</p>
-                  <p className="text-sm text-muted-foreground">{`Patient ID: ${selectedPatient.patient_id_provided}`}</p>
-                </div>
-              )}
-
-              <ScrollArea className="h-[60vh] pr-4">
-                <div className="space-y-4 pr-4">
-                  <FormField
-                    control={form.control}
-                    name="last_menstrual_period"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Menstrual Period</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                field.onChange(parseDateFromInput(e.target.value))
-                              }
-                            }}
-                            value={field.value ? formatDateForInput(field.value) : ""}
-                            max={formatDateForInput(new Date())} // Prevent future dates
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    {selectedPatient && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-muted p-3 rounded-md mb-4"
+                      >
+                        <p className="font-medium">{`${selectedPatient.first_name} ${selectedPatient.middle_initial} ${selectedPatient.last_name}`}</p>
+                        <p className="text-sm text-muted-foreground">{`Patient ID: ${selectedPatient.patient_id_provided}`}</p>
+                      </motion.div>
                     )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="estimated_date_of_confinement"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estimated Date of Confinement (EDD)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                field.onChange(parseDateFromInput(e.target.value))
-                              }
-                            }}
-                            value={field.value ? formatDateForInput(field.value) : ""}
+                    <ScrollArea className="h-[60vh] pr-4">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="space-y-4 pr-4"
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <FormField
+                            control={form.control}
+                            name="last_menstrual_period"
+                            render={({ field }) => (
+                              <FormItem className="transition-all duration-200">
+                                <FormLabel className="font-medium text-foreground/80">Last Menstrual Period</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="date"
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        field.onChange(parseDateFromInput(e.target.value))
+                                      }
+                                    }}
+                                    value={field.value ? formatDateForInput(field.value) : ""}
+                                    max={formatDateForInput(new Date())} // Prevent future dates
+                                    className="border-input/50 focus:border-primary transition-all duration-200"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        </motion.div>
 
-                  <div className="flex justify-end gap-2 pt-6 pb-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsPrenatalFormOpen(false)
-                        setSelectedPatient(null)
-                        form.reset()
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <span className="mr-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          </span>
-                          Processing...
-                        </>
-                      ) : (
-                        "Save Prenatal Record"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </ScrollArea>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          <FormField
+                            control={form.control}
+                            name="estimated_date_of_confinement"
+                            render={({ field }) => (
+                              <FormItem className="transition-all duration-200">
+                                <FormLabel className="font-medium text-foreground/80">
+                                  Estimated Date of Confinement (EDD)
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="date"
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        field.onChange(parseDateFromInput(e.target.value))
+                                      }
+                                    }}
+                                    value={field.value ? formatDateForInput(field.value) : ""}
+                                    className="border-input/50 focus:border-primary transition-all duration-200"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </motion.div>
+
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 }}
+                          className="flex justify-end gap-2 pt-6 pb-4"
+                        >
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setIsPrenatalFormOpen(false)
+                              setSelectedPatient(null)
+                              form.reset()
+                            }}
+                            className="transition-all duration-200"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="bg-primary hover:bg-primary/90 transition-all duration-200"
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              "Save Prenatal Record"
+                            )}
+                          </Button>
+                        </motion.div>
+                      </motion.div>
+                    </ScrollArea>
+                  </form>
+                </Form>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </>
   )
 }

@@ -4,46 +4,42 @@ import type React from "react"
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
-import { Loader2, Trash2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 interface PrenatalDeleteFormProps {
   prenatalId: string
-  patientId: string
+  patientId?: string
   patientName: string
   onDeleted?: () => void
   trigger: React.ReactNode
 }
 
-export function PrenatalDeleteForm({
-  prenatalId,
-  patientName,
-  onDeleted,
-  trigger,
-}: PrenatalDeleteFormProps) {
+export function PrenatalDeleteForm({ prenatalId, patientName, onDeleted, trigger }: PrenatalDeleteFormProps) {
   const supabase = createClient()
   const [isOpen, setIsOpen] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
     try {
-      setIsProcessing(true)
+      setIsDeleting(true)
 
       // First delete all related diagnosis records
       const { error: diagnosisError } = await supabase.from("PrenatalBasicInfo").delete().eq("id", prenatalId)
 
       if (diagnosisError) {
         console.error("Error deleting diagnosis records:", diagnosisError)
-        toast.error("Failed to delete related diagnosis records")
+        toast("Failed to delete related diagnosis records. Please try again.")
         return
       }
 
@@ -52,21 +48,21 @@ export function PrenatalDeleteForm({
 
       if (prenatalError) {
         console.error("Error deleting prenatal record:", prenatalError)
-        toast.error("Failed to delete prenatal record")
+        toast("Failed to delete prenatal record. Please try again.")
         return
       }
 
-      toast.success("Prenatal record deleted successfully")
-      setIsOpen(false)
+      toast("Prenatal record has been deleted successfully.")
 
       if (onDeleted) {
         onDeleted()
       }
     } catch (error) {
       console.error("Unexpected error:", error)
-      toast.error("An unexpected error occurred")
+      toast("An unexpected error occurred. Please try again.")
     } finally {
-      setIsProcessing(false)
+      setIsDeleting(false)
+      setIsOpen(false)
     }
   }
 
@@ -74,49 +70,36 @@ export function PrenatalDeleteForm({
     <>
       <div onClick={() => setIsOpen(true)}>{trigger}</div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Delete Prenatal Record</DialogTitle>
-            <DialogDescription>You are about to delete the prenatal record for {patientName}</DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <div className="rounded-md bg-red-50 p-4 mb-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <Trash2 className="h-5 w-5 text-red-400" aria-hidden="true" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Warning</h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <p>
-                      This action will permanently delete this prenatal record and all associated diagnosis and
-                      treatment information. This action cannot be undone.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={isProcessing}>
-              {isProcessing ? (
+      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Prenatal Record</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {patientName}&#39;s prenatal record? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                handleDelete()
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (
-                "Delete Record"
+                "Delete"
               )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
