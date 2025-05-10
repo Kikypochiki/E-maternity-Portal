@@ -89,7 +89,7 @@ export function PasswordRecoveryForm({ className, ...props }: React.ComponentPro
           ) : (
             <div className="flex flex-col gap-6">
               <p className="text-center text-sm text-muted-foreground">
-                We've sent a password recovery link to <strong>{email}</strong>. Please check your email and follow the
+                We&apos;ve sent a password recovery link to <strong>{email}</strong>. Please check your email and follow the
                 instructions to reset your password.
               </p>
               <Button
