@@ -27,51 +27,52 @@ import {
   Stethoscope,
   UserCheck,
 } from "lucide-react"
+
 interface PatientData {
-  patient_id: string;
-  patient_id_provided: string;
-  user_id: string;
-  first_name: string;
-  middle_initial: string;
-  last_name: string;
-  sex: string;
-  date_of_birth: string;
-  contact_number: string;
-  permanent_address: string;
-  civil_status: string;
-  religion: string;
-  nationality: string;
-  birthplace: string;
-  occupation?: string;
-  spouse_name?: string;
-  gravidity?: number;
-  parity?: number;
+  patient_id: string
+  patient_id_provided: string
+  user_id: string
+  first_name: string
+  middle_initial: string
+  last_name: string
+  sex: string
+  date_of_birth: string
+  contact_number: string
+  permanent_address: string
+  civil_status: string
+  religion: string
+  nationality: string
+  birthplace: string
+  occupation?: string
+  spouse_name?: string
+  gravidity?: number
+  parity?: number
 }
 
 interface Appointment {
-  date_of_appointment: string;
-  time_of_appointment: string;
+  date_of_appointment: string
+  time_of_appointment: string
 }
 
 interface Notification {
-  notif_id: string;
-  notif_content: string;
-  created_at: string;
+  notif_id: string
+  notif_content: string
+  created_at: string
 }
 
 interface LabFile {
-  id: string;
-  file_name: string;
-  created_at: string;
+  id: string
+  file_name: string
+  created_at: string
 }
 
 interface AdmissionData {
-  created_at: string;
-  attending_clinic_staff?: string;
-  referring_personnel?: string;
-  admission_type?: string;
-  admitting_diagnosis?: string;
-  admitting_diagnosis_icd_code?: string;
+  created_at: string
+  attending_clinic_staff?: string
+  referring_personnel?: string
+  admission_type?: string
+  admitting_diagnosis?: string
+  admitting_diagnosis_icd_code?: string
 }
 
 export default function Patient() {
@@ -338,7 +339,7 @@ export default function Patient() {
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-6xl">
+    <div className="container mx-auto py-6 px-4 sm:px-6 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-primary">Patient Portal</h1>
         <Button onClick={handleLogout} disabled={isLoggingOut} variant="outline" className="flex items-center gap-2">
@@ -348,9 +349,9 @@ export default function Patient() {
       </div>
 
       {patientData ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Patient Profile Card */}
-          <Card className="md:col-span-1">
+          <Card className="lg:col-span-1">
             <CardHeader className="text-center">
               <Avatar className="h-24 w-24 mx-auto mb-4">
                 <AvatarImage
@@ -409,22 +410,47 @@ export default function Patient() {
           </Card>
 
           {/* Main Content Area */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid grid-cols-5 mb-6">
-                <TabsTrigger value="details">Personal</TabsTrigger>
-                <TabsTrigger value="medical">Medical</TabsTrigger>
-                <TabsTrigger value="appointments">Appointments</TabsTrigger>
-                <TabsTrigger value="notifications" className="relative">
-                  Notifications
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-                      {notifications.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="labresults">Lab Results</TabsTrigger>
-              </TabsList>
+              <div className="mb-6">
+                {/* Mobile Tabs - Scrollable container for small screens */}
+                <div className="block md:hidden">
+                  <div className="overflow-x-auto pb-2">
+                    <TabsList className="w-max inline-flex">
+                      <TabsTrigger value="details">Personal</TabsTrigger>
+                      <TabsTrigger value="medical">Medical</TabsTrigger>
+                      <TabsTrigger value="appointments">Appointments</TabsTrigger>
+                      <TabsTrigger value="notifications" className="relative">
+                        Notifications
+                        {notifications.length > 0 && (
+                          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                            {notifications.length}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                      <TabsTrigger value="labresults">Lab Results</TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+
+                {/* Desktop Tabs - Only visible on medium screens and up */}
+                <div className="hidden md:block">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="details">Personal</TabsTrigger>
+                    <TabsTrigger value="medical">Medical</TabsTrigger>
+                    <TabsTrigger value="appointments">Appointments</TabsTrigger>
+                    <TabsTrigger value="notifications" className="relative">
+                      Notifications
+                      {notifications.length > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                          {notifications.length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="labresults">Lab Results</TabsTrigger>
+                  </TabsList>
+                </div>
+              </div>
 
               <TabsContent value="details" className="space-y-6">
                 <Card>
@@ -434,7 +460,7 @@ export default function Patient() {
                       Personal Information
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <p className="text-sm text-muted-foreground">Civil Status</p>
                       <p className="font-medium">{patientData.civil_status}</p>
@@ -476,7 +502,7 @@ export default function Patient() {
                       <CardDescription>You are currently admitted to our facility</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="p-4 bg-primary/5 rounded-lg">
                           <div className="flex items-center gap-2 mb-2">
                             <Calendar className="h-4 w-4 text-primary" />
@@ -533,7 +559,7 @@ export default function Patient() {
                       </div>
 
                       {patientData.sex === "Female" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div className="p-4 bg-primary/5 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                               <User className="h-4 w-4 text-primary" />
@@ -598,8 +624,11 @@ export default function Patient() {
                     {appointments.length > 0 ? (
                       <div className="space-y-4">
                         {appointments.map((appointment, index) => (
-                          <div key={index} className="flex items-center p-3 border rounded-lg">
-                            <div className="bg-primary/10 p-3 rounded-full mr-4">
+                          <div
+                            key={index}
+                            className="flex flex-col sm:flex-row items-start sm:items-center p-3 border rounded-lg"
+                          >
+                            <div className="bg-primary/10 p-3 rounded-full mb-3 sm:mb-0 sm:mr-4">
                               <Calendar className="h-5 w-5 text-primary" />
                             </div>
                             <div className="flex-1">
@@ -644,12 +673,12 @@ export default function Patient() {
                         {notifications.map((notification: Notification) => (
                           <div
                             key={notification.notif_id ?? `${notification.created_at}-${notification.notif_content}`}
-                            className="flex items-start p-3 border rounded-lg"
+                            className="flex flex-col sm:flex-row items-start p-3 border rounded-lg"
                           >
-                            <div className="bg-primary/10 p-3 rounded-full mr-4 mt-1">
+                            <div className="bg-primary/10 p-3 rounded-full mb-3 sm:mb-0 sm:mr-4">
                               <AlertCircle className="h-5 w-5 text-primary" />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 mb-2 sm:mb-0">
                               <p className="font-medium mb-1">{notification.notif_content}</p>
                               <p className="text-xs text-muted-foreground">
                                 {notification.created_at
@@ -662,7 +691,7 @@ export default function Patient() {
                               size="icon"
                               onClick={() => handleDeleteNotification(notification.notif_id)}
                               disabled={isDeleting === notification.notif_id}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 self-end sm:self-auto"
                             >
                               {isDeleting === notification.notif_id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -696,11 +725,14 @@ export default function Patient() {
                     {labFiles.length > 0 ? (
                       <div className="space-y-4">
                         {labFiles.map((file) => (
-                          <div key={file.id} className="flex items-center p-3 border rounded-lg">
-                            <div className="bg-primary/10 p-3 rounded-full mr-4">
+                          <div
+                            key={file.id}
+                            className="flex flex-col sm:flex-row items-start sm:items-center p-3 border rounded-lg"
+                          >
+                            <div className="bg-primary/10 p-3 rounded-full mb-3 sm:mb-0 sm:mr-4">
                               <FileText className="h-5 w-5 text-primary" />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 mb-2 sm:mb-0">
                               <p className="font-medium">{file.file_name}</p>
                               <p className="text-xs text-muted-foreground">
                                 {file.created_at ? new Date(file.created_at).toLocaleString() : "Date not available"}
@@ -711,7 +743,7 @@ export default function Patient() {
                               size="sm"
                               onClick={() => handleDownloadFile(file.file_name)}
                               disabled={isDownloading === file.file_name}
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 self-end sm:self-auto"
                             >
                               {isDownloading === file.file_name ? (
                                 <>
