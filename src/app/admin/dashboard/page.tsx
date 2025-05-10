@@ -445,7 +445,14 @@ export default function Dashboard() {
                               year: "numeric",
                             })}
                           </p>
-                        </div>  
+                        </div>
+                        <Button
+                          variant="link"
+                          className="ml-auto text-sm hover:underline"
+                          onClick={() => router.push(`/admin/patients`)}
+                        >
+                          View Details
+                        </Button> 
                       </div>
                     ))}
                   </div>
@@ -478,7 +485,16 @@ export default function Dashboard() {
                             <p className="text-sm font-medium leading-none">
                               {admission.Patients?.first_name} {admission.Patients?.last_name}
                             </p>
-                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            <Badge
+                              variant="outline"
+                              className={
+                              admission.admission_type === "new"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : admission.admission_type === "old"
+                                ? "bg-yellow-50 text-yellow-800 border-yellow-200"
+                                : "bg-amber-50 text-amber-700 border-amber-200"
+                              }
+                            >
                               {admission.admission_type}
                             </Badge>
                           </div>
@@ -491,6 +507,13 @@ export default function Dashboard() {
                             })}
                           </p>
                         </div>
+                        <Button
+                          variant="link"
+                          className="ml-auto text-sm hover:underline"
+                          onClick={() => router.push(`/admin/admissions`)}
+                        >
+                          View Details
+                        </Button> 
                       </div>
                     ))}
                   </div>

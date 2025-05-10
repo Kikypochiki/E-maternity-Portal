@@ -140,8 +140,8 @@ return (
       ) : (
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="all">All Prenatals</TabsTrigger>
-            <TabsTrigger value="recent">Recent Checkups</TabsTrigger>
+            <TabsTrigger value="all">All </TabsTrigger>
+            <TabsTrigger value="recent">Recent</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-2">

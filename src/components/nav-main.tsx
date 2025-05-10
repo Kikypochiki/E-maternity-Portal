@@ -1,10 +1,10 @@
 "use client"
 
-import { type LucideIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
+import type { LucideIcon } from "lucide-react"
 
-import {
-  Collapsible,
-} from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
+import { Collapsible } from "@/components/ui/collapsible"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -27,22 +27,22 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const pathname = usePathname()
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible
-            key={item.title}
-            asChild
-            defaultOpen={item.isActive}
-            className="group/collapsible"
-          >
+          <Collapsible key={item.title} asChild defaultOpen={item.isActive} className="group/collapsible">
             <SidebarMenuItem>
-              <SidebarMenuButton tooltip={item.title} asChild>
+              <SidebarMenuButton
+                tooltip={item.title}
+                asChild
+                className={cn(pathname === item.url && "bg-accent text-accent-foreground font-medium")}
+              >
                 <a href={item.url}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
+                  {item.icon && <item.icon className={cn(pathname === item.url && "text-primary")} />}
+                  <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
