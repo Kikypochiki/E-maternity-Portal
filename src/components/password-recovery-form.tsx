@@ -59,7 +59,7 @@ export function PasswordRecoveryForm({ className, ...props }: React.ComponentPro
               <CardTitle>Reset your password</CardTitle>
               <CardDescription>
                 {!isSubmitted
-                  ? "Enter your email and we'll send you a link to reset your password"
+                  ? "Enter your email and we&apos;ll send you a link to reset your password"
                   : "Check your email for a link to reset your password"}
               </CardDescription>
             </div>
