@@ -922,7 +922,7 @@ export default function AppointmentsPage() {
                           <CardContent>
                             {getAppointmentsForDate(date).length > 0 ? (
                               <div className="space-y-4">
-                                {getAppointmentsForDate(date).map((appointment, index) => {
+                                {getAppointmentsForDate(date).map((appointment) => {
                                   const patient = getPatientById(appointment.patient_id)
                                   return (
                                     <div
@@ -1076,7 +1076,7 @@ export default function AppointmentsPage() {
                         <CardContent>
                           {todaysAppointments.length > 0 ? (
                             <div className="space-y-4">
-                              {todaysAppointments.map((appointment, index) => {
+                              {todaysAppointments.map((appointment) => {
                                 const patient = getPatientById(appointment.patient_id)
                                 return (
                                   <div
@@ -1150,7 +1150,7 @@ export default function AppointmentsPage() {
                         <CardContent>
                           {upcomingAppointments.length > 0 ? (
                             <div className="space-y-4">
-                              {upcomingAppointments.map((appointment, index) => {
+                              {upcomingAppointments.map((appointment) => {
                                 const patient = getPatientById(appointment.patient_id)
                                 return (
                                   <div
