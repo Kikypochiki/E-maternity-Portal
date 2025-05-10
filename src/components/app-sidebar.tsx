@@ -68,9 +68,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data}/>
       </SidebarContent>
       <SidebarFooter className="">
-        <div className="flex items-center gap-2 mb-4 ml-2 mr-2">
-          <div className="text-sm group-data-[collapsible=icon]:hidden">E-Maternity Portal</div>
-          <div className="text-xs group-data-[collapsible=icon]:hidden">Version 1.0.0</div>
+        <div className="flex flex-col gap-0.5 mb-4 ml-2 mr-2">
+          <div className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
+            E-Maternity Portal
+          </div>
+          <div className="text-xs group-data-[collapsible=icon]:hidden">
+            Version 1.0.0
+          </div>
+          <div className="text-xs group-data-[collapsible=icon]:hidden">
+            © 2025 All rights reserved
+          </div>
+          <div className="text-xs group-data-[collapsible=icon]:hidden">
+            Developed by: Dohn Michael Varquez
+          </div>
+          <div className="text-xs group-data-[collapsible=icon]:hidden">
+            Visayas State University
+          </div>
         </div>
       </SidebarFooter>
       <SidebarRail />
