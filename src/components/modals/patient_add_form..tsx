@@ -147,12 +147,6 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
     }
   }
 
-  const handleClose = () => {
-    if (!isSubmitting) {
-      setIsOpen(false)
-      form.reset()
-    }
-  }
 
   return (
     <div>
