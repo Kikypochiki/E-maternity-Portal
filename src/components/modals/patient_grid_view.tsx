@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { PatientBasicInfoView } from "@/components/modals/patient_basic_info_view"
 import { PatientDeleteDialog } from "@/components/modals/patient_delete_dialog"
 import { Button } from "@/components/ui/button"
-import { Eye, Trash, User } from 'lucide-react'
+import { Eye, Trash, User, ArrowLeft, ArrowRight} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Patient } from "@/app/admin/patients/columns"
 import { Badge } from "@/components/ui/badge"
@@ -21,7 +21,12 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
     const itemsPerPage = 8
 
     // Filter data based on search query
-    const filteredData = data.filter((patient) => patient.last_name.toLowerCase().includes(searchQuery.toLowerCase()))
+      const filteredData = data.filter(
+    (patient) =>
+      patient.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.patient_id_provided.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
     // Calculate pagination
     const totalPages = Math.ceil(filteredData.length / itemsPerPage)
@@ -31,15 +36,15 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
     return (
         <div className="w-full space-y-4 p-7">
             <div className="flex items-center py-4">
-                <Input
-                    placeholder="Search Last Name..."
-                    value={searchQuery}
-                    onChange={(event) => {
-                        setSearchQuery(event.target.value)
-                        setCurrentPage(1) // Reset to first page on search
-                    }}
-                    className="max-w-sm"
-                />
+        <Input
+          placeholder="Search Patient..."
+          value={searchQuery}
+          onChange={(event) => {
+            setSearchQuery(event.target.value)
+            setCurrentPage(1) // Reset to first page on search
+          }}
+          className="max-w-sm"
+        />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -59,6 +64,9 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
                                         <h3 className="font-bold text-lg tracking-wide text-primary">
                                             {patient.last_name.toUpperCase()}, {patient.first_name.toUpperCase()}
                                         </h3>
+                                        <p className="text-sm text-gray-500">
+                                            {patient.patient_id_provided}
+                                        </p>
                                         <Badge variant="outline" className="text-sm font-medium  bg-green-50 text-green-700 border-green-200">
                                             G{patient.gravidity}  P{patient.parity}
                                         </Badge>
@@ -108,7 +116,7 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
                     >
-                        Previous
+                        <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div className="text-sm px-2">
                         Page {currentPage} of {totalPages}
@@ -119,7 +127,7 @@ export function PatientGridView({ data, onPatientDeleted }: PatientGridViewProps
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
                     >
-                        Next
+                        <ArrowRight className="h-4 w-4" />
                     </Button>
                 </div>
             )}

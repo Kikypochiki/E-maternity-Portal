@@ -763,7 +763,7 @@ export default function AppointmentsPage() {
           ) : (
             <>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Appointment</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Appointments</h1>
                 <p className="text-muted-foreground">Schedule and manage patient check-up appointments</p>
               </div>
               <Dialog open={isSelectPatientOpen} onOpenChange={setIsSelectPatientOpen}>

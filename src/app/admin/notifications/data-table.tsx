@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Trash2 } from "lucide-react"
 import type { Notification } from "./columns"
+import {ArrowLeft, ArrowRight} from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -119,10 +120,10 @@ export function DataTable<TData, TValue>({ columns, data, onDeleteSelected }: Da
           selected.
         </div>
         <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-          Previous
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          Next
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

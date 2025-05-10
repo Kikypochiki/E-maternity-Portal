@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {ArrowLeft, ArrowRight} from "lucide-react"
 
 import {
   type ColumnDef,
@@ -24,6 +25,7 @@ interface DataTableProps<TData, TValue> {
 }
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const table = useReactTable({
     data,
@@ -33,31 +35,44 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-    state: {
-      sorting,
-      columnFilters,
-    },
-  })
+   getFilteredRowModel: getFilteredRowModel(),
+       initialState: {
+         pagination: {
+           pageSize: 10,
+         },
+       },
+       state: {
+         sorting,
+         columnFilters,
+         globalFilter,
+       },
+       onGlobalFilterChange: setGlobalFilter,
+       globalFilterFn: (row, columnId, filterValue) => {
+         const searchValue = String(filterValue).toLowerCase()
+   
+         // Check if any of the specified fields contain the search value
+         const lastName = String(row.getValue("last_name") || "").toLowerCase()
+         const firstName = String(row.getValue("first_name") || "").toLowerCase()
+         const patientId = String(row.getValue("patient_id_provided") || "").toLowerCase()
+   
+         return lastName.includes(searchValue) || firstName.includes(searchValue) || patientId.includes(searchValue)
+       },
+     })
+   
 
   return (
     <div className="w-full space-y-4 p-7">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search Last Name..."
-          value={(table.getColumn("last_name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("last_name")?.setFilterValue(event.target.value)}
+          placeholder="Search Patient..."
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
       </div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader className="bg-accent">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -91,13 +106,13 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-          Previous
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="text-sm px-2">
                         Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                     </div>
         <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          Next
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Eye, Trash, ClipboardList, UserMinus, Pill, MoreVertical, FileText, Upload } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import {ArrowLeft, ArrowRight} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -223,7 +224,7 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
-            Previous
+            <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="text-sm px-2">
             Page {currentPage} of {totalPages}
@@ -234,7 +235,7 @@ export function AdmissionGridView({ data, onAdmissionDeleted }: AdmissionGridVie
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
-            Next
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       )}

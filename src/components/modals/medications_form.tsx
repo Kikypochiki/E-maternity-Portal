@@ -522,6 +522,7 @@ export function MedicationsForm({
                               <Input
                                 id="date-to-take"
                                 type="date"
+                                min={new Date().toISOString().split("T")[0]}
                                 {...field}
                                 disabled={isPatientDischarged}
                               />
@@ -605,6 +606,7 @@ export function MedicationsForm({
                               <Input
                                 id="edit-date-to-take"
                                 type="date"
+                                min={new Date().toISOString().split("T")[0]}
                                 {...field}
                                 disabled={isPatientDischarged}
                               />

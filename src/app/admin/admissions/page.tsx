@@ -97,9 +97,15 @@ export default function Admissions() {
       <div className="flex flex-row items-center justify-between m-2">
         <div className="flex items-center">
           {loading ? (
-            <Skeleton className="w-[150px] h-[28px] rounded-full" />
+            <div>
+              <Skeleton className="h-8 w-48 mb-1" />
+              <Skeleton className="h-4 w-64" />
+            </div>
           ) : (
-            <h2 className="text-3xl font-bold tracking-tight">Admissions</h2>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Addmissions</h1>
+                <p className="text-muted-foreground">View and manage patient admissions</p>
+              </div>
           )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">

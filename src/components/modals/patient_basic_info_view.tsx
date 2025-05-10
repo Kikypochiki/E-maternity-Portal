@@ -841,6 +841,7 @@ const handleDownloadFile = async (filePath: string, fileName: string) => {
                           value={formData.date_of_birth || ""}
                           onChange={handleChange}
                           className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+                          max={new Date().toISOString().split("T")[0]}
                         />
                       </div>
 
@@ -851,9 +852,23 @@ const handleDownloadFile = async (filePath: string, fileName: string) => {
                         <Input
                           id="contact_number"
                           name="contact_number"
-                          value={formData.contact_number || ""}
-                          onChange={handleChange}
+                          placeholder="####-###-####"
+                          maxLength={13}
+                          pattern="\d{4}-\d{3}-\d{4}"
+                          inputMode="numeric"
                           className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+                          value={formData.contact_number || ""}
+                          onChange={(e) => {
+                            // Only allow numbers and dashes, and auto-insert dashes
+                            let value = e.target.value.replace(/[^\d]/g, "");
+                            if (value.length > 4) value = value.slice(0, 4) + "-" + value.slice(4);
+                            if (value.length > 8) value = value.slice(0, 8) + "-" + value.slice(8);
+                            if (value.length > 13) value = value.slice(0, 13);
+                            setFormData((prev) => ({
+                              ...prev,
+                              contact_number: value,
+                            }));
+                          }}
                         />
                       </div>
 

@@ -262,13 +262,14 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 render={({ field }) => (
                   <FormItem className="transition-all duration-200">
                   <FormLabel className="font-medium text-foreground/80">Date of Birth</FormLabel>
-                  <FormControl>
+                    <FormControl>
                     <Input
-                    type="date"
-                    {...field}
-                    className="border-input/50 focus:border-primary transition-all duration-200"
+                      type="date"
+                      max={new Date().toISOString().split("T")[0]}
+                      {...field}
+                      className="border-input/50 focus:border-primary transition-all duration-200"
                     />
-                  </FormControl>
+                    </FormControl>
                   <FormMessage />
                   </FormItem>
                 )}
@@ -301,13 +302,25 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 render={({ field }) => (
                   <FormItem className="transition-all duration-200">
                   <FormLabel className="font-medium text-foreground/80">Contact Number</FormLabel>
-                  <FormControl>
+                    <FormControl>
                     <Input
-                    placeholder="Contact Number"
-                    {...field}
-                    className="border-input/50 focus:border-primary transition-all duration-200"
+                      placeholder="####-###-####"
+                      {...field}
+                      maxLength={13}
+                      pattern="\d{4}-\d{3}-\d{4}"
+                      inputMode="numeric"
+                      className="border-input/50 focus:border-primary transition-all duration-200"
+                      onChange={(e) => {
+                      // Only allow numbers and dashes, and auto-insert dashes
+                      let value = e.target.value.replace(/[^\d]/g, "");
+                      if (value.length > 4) value = value.slice(0, 4) + "-" + value.slice(4);
+                      if (value.length > 8) value = value.slice(0, 8) + "-" + value.slice(8);
+                      if (value.length > 13) value = value.slice(0, 13);
+                      field.onChange(value);
+                      }}
+                      value={field.value}
                     />
-                  </FormControl>
+                    </FormControl>
                   <FormMessage />
                   </FormItem>
                 )}
@@ -419,15 +432,19 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 render={({ field }) => (
                   <FormItem className="transition-all duration-200">
                   <FormLabel className="font-medium text-foreground/80">Gravidity</FormLabel>
-                  <FormControl>
+                    <FormControl>
                     <Input
-                    type="number"
-                    placeholder="Gravidity"
-                    value={field.value || ""}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="border-input/50 focus:border-primary transition-all duration-200"
+                      type="number"
+                      placeholder="Gravidity"
+                      value={field.value === 0 ? "0" : field.value || ""}
+                      onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? "" : Number(val));
+                      }}
+                      min={0}
+                      className="border-input/50 focus:border-primary transition-all duration-200"
                     />
-                  </FormControl>
+                    </FormControl>
                   <FormMessage />
                   </FormItem>
                 )}
@@ -437,15 +454,19 @@ export function PatientAddForm({ trigger, onPatientAdded }: PatientAddFormModalP
                 render={({ field }) => (
                   <FormItem className="transition-all duration-200">
                   <FormLabel className="font-medium text-foreground/80">Parity</FormLabel>
-                  <FormControl>
+                    <FormControl>
                     <Input
-                    type="number"
-                    placeholder="Parity"
-                    value={field.value || ""}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="border-input/50 focus:border-primary transition-all duration-200"
+                      type="number"
+                      placeholder="Parity"
+                      value={field.value === 0 ? "0" : field.value || ""}
+                      onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? "" : Number(val));
+                      }}
+                      min={0}
+                      className="border-input/50 focus:border-primary transition-all duration-200"
                     />
-                  </FormControl>
+                    </FormControl>
                   <FormMessage />
                   </FormItem>
                 )}

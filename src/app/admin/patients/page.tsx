@@ -101,9 +101,17 @@ export default function Patients() {
       <div className="flex flex-row h-4 m-2">
         <div className="flex items-center">
           {loading ? (
-            <Skeleton className="w-[150px] h-[28px] rounded-full" />
+                      <>
+            <div>
+              <Skeleton className="h-8 w-48 mb-1" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+          </>
           ) : (
-            <h2 className="text-3xl font-bold tracking-tight">Patients</h2>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Patients</h1>
+              <p className="text-muted-foreground">Manage patients and records</p>
+            </div>
           )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
