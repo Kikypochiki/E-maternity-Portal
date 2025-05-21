@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PrenatalAddForm } from "@/components/modals/prenatal-add-form"
 import { Calendar, User } from "lucide-react"
+import NotifyPatient from "@/components/modals/notify-patient"
 
 // Utility function to format a date string as "MM/DD/YYYY"
 function formatDate(dateString: string) {
@@ -28,6 +29,34 @@ export default function Admissions() {
   const [data, setData] = useState<Prenatal[]>([])
   const [loading, setLoading] = useState(true)
   const [] = useState<"table" | "grid">("table")
+
+  // Notify patients 1 week before their estimated due date
+  const notifyPatientsDueSoon = async () => {
+    const today = new Date()
+    const oneWeekFromNow = new Date()
+    oneWeekFromNow.setDate(today.getDate() + 7)
+
+    for (const prenatal of data) {
+      if (!prenatal.estimated_date_of_confinement || !prenatal.patient_id) continue
+
+      const edd = new Date(prenatal.estimated_date_of_confinement)
+      // Check if EDD is exactly 7 days from today (ignoring time)
+      const diffDays = Math.ceil((edd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      if (diffDays === 7) {
+        await NotifyPatient({
+          patient_id: prenatal.patient_id,
+          notificationContent: `Your estimated due date is in one week (${formatDate(prenatal.estimated_date_of_confinement)}). Please prepare accordingly and contact your healthcare provider if you have any concerns.`,
+        })
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (!loading && data.length > 0) {
+      notifyPatientsDueSoon()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, data])
 
   const fetchData = async () => {
     try {
