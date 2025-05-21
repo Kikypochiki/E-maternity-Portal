@@ -106,14 +106,16 @@ export function SignupForm({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [patientId, setPatientId] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast.error("Passwords do not match.");
       return;
     }
+    setLoading(true);
     await patientSignUp(email, password, patientId);
+    setLoading(false);
   };
 
   return (
@@ -169,8 +171,8 @@ export function SignupForm({
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  {signupText}
+                <Button type="submit" className="w-full" disabled={password !== confirmPassword || !email || !password || !patientId || loading}>
+                  {loading ? "Signing up..." : signupText}
                 </Button>
               </div>
             </div>
