@@ -39,11 +39,13 @@ async function adminSignUp(
     return
   }
 
-  const { data, error } = await serviceSupabase.auth.admin.createUser({
+   const { data, error } = await serviceSupabase.auth.signUp({
     email: email,
     password: password,
-    user_metadata: {
-      role: "admin",
+    options: {
+      data: {
+        role: "admin",
+      },
     },
   })
 
