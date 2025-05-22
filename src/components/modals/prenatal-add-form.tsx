@@ -288,7 +288,7 @@ export function PrenatalAddForm({ trigger, onPrenatalAdded }: PrenatalAddFormPro
                         onClick={() => handlePatientSelect(patient)}
                       >
                         <div className="flex flex-col">
-                          <span className="font-medium">{`${patient.first_name} ${patient.middle_initial} ${patient.last_name}`}</span>
+                          <span className="font-medium">{`${patient.first_name} ${patient.middle_initial}. ${patient.last_name}`}</span>
                           <span className="text-sm text-muted-foreground">{`Patient ID: ${patient.patient_id_provided}`}</span>
                         </div>
                         <Button variant="ghost" size="sm">
