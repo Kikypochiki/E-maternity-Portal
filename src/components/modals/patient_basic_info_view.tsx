@@ -1098,12 +1098,12 @@ const handleDownloadFile = async (filePath: string, fileName: string) => {
                         <InfoItem
                           icon={<Users className="text-primary" />}
                           label="Gravidity"
-                          value={formData.gravidity?.toString() || "0"}
+                          value={formData.gravidity?.toString() || "N/A"}
                         />
                         <InfoItem
                           icon={<Users className="text-primary" />}
                           label="Parity"
-                          value={formData.parity?.toString() || "0"}
+                          value={formData.parity?.toString() || "N/A"}
                         />
                       </div>
                     </motion.div>

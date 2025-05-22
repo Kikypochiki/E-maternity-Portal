@@ -57,8 +57,8 @@ export default function Patients() {
           birthplace: patient.birthplace || "N/A",
           nationality: patient.nationality || "N/A",
           spouse_name: patient.spouse_name || "N/A",
-          gravidty: patient.gravidty || "N/A",
-          parity: patient.parity || "N/A",
+          gravidty: patient.gravidty || 0,
+          parity: patient.parity || 0,
         }))
         setData(formattedData)
       }

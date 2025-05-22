@@ -47,7 +47,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
          globalFilter,
        },
        onGlobalFilterChange: setGlobalFilter,
-       globalFilterFn: (row, columnId, filterValue) => {
+       globalFilterFn: (row, filterValue) => {
          const searchValue = String(filterValue).toLowerCase()
    
          // Check if any of the specified fields contain the search value
